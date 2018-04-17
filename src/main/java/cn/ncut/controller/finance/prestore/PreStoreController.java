@@ -55,7 +55,19 @@ public class PreStoreController extends BaseController {
 		PageData pd = new PageData();
 		pd = this.getPageData();
 		pd.put("PRESTORE_ID", this.get32UUID());	//主键
-		prestoreService.save(pd);
+		//prestoreService.save(pd);
+		//先查询这个人的phone有没有，如果没有则插入，如果有则更新
+		PageData prestorepd = prestoreService.findByPhone(pd);
+		if(prestorepd!=null){
+			double sum_money = (double)prestorepd.get("SUM_MPNEY");
+			//更新
+			sum_money = sum_money + (double)pd.get("SUM_MONEY");
+			pd.put("SUM_MONEY", sum_money);
+			prestoreService.updatePrestoreByPhone(pd);
+		}else{
+			//插入
+			prestoreService.save(pd);
+		}
 		mv.addObject("msg","success");
 		mv.setViewName("save_result");
 		return mv;

@@ -32,6 +32,8 @@ public class PreStoreService implements PreStoreManager{
 		dao.save("PreStoreMapper.save", pd);
 	}
 	
+	
+	
 	/**删除
 	 * @param pd
 	 * @throws Exception
@@ -91,6 +93,17 @@ public class PreStoreService implements PreStoreManager{
 		dao.update("PreStoreMapper.editMember", pd);	
 	}
 
+	/**通过phone获取数据
+	 * @param pd
+	 * @throws Exception
+	 */
+	public PageData findByPhone(PageData pd)throws Exception{
+		return (PageData)dao.findForObject("PreStoreMapper.findByPhone", pd);
+	}
+	@Override
+	public void updatePrestoreByPhone(PageData pd) throws Exception {	
+		dao.update("PreStoreMapper.updatePrestoreByPhone", pd);	
+	}
 	
 }
 

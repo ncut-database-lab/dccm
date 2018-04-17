@@ -128,5 +128,23 @@
 		</foreach>
 	</delete>
 	
+	<!-- 通过Phone获取数据 -->
+	<select id="findByPhone" parameterType="pd" resultType="pd">
+		select 
+		<include refid="Field"></include>
+		from 
+		<include refid="tableName"></include>
+		where 
+			PHONE = #{PHONE}
+	</select>
+	<update id="updatePrestoreByPhone" parameterType="pd">
+		update
+		<include refid="tableName"></include>
+		set 
+		SUM_MONEY = #{SUM_MONEY}	
+		where 
+		PHONE = #{PHONE}
+	</update>
+	
 	<!-- fh313596790qq(青苔) -->
 </mapper>

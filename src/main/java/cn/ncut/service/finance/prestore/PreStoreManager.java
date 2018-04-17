@@ -65,5 +65,8 @@ public interface PreStoreManager{
 	
 	public void updateMember(PageData pd)throws Exception;
 	
+	public PageData findByPhone(PageData pd)throws Exception;
+	public void updatePrestoreByPhone(PageData pd) throws Exception;
+	
 }
 
