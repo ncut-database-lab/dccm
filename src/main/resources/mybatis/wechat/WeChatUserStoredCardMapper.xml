@@ -75,4 +75,35 @@
 		where
 			userStoredCard.UID = #{uId}
 	</update>
+
+	<update id="updatePasswordOfAllCreditCard" parameterType="WeChatUserStoredCard">
+		UPDATE
+			tb_custom_stored userStoredCard
+		SET
+			userStoredCard.PASSWORD = #{password}
+		WHERE
+			userStoredCard.UID = #{uId}
+		AND
+			userStoredCard.STATUS = #{status}
+	</update>
+
+	<select id="existOfCreditCardOfUserByUid" parameterType="java.lang.Integer" resultMap="weChatUserStoredCardResultMap">
+		select
+			userStoredCard.CARD_ID as cardId,
+			userStoredCard.REMAIN_MONEY as remainMoney,
+			userStoredCard.REMAIN_POINTS as remainPoints,
+			userStoredCard.STATUS as status,
+			userStoredCard.PASSWORD as password,
+			user.UID as uId,
+			user.NAME as name,
+			user.PHONE as phone
+		from
+			TB_CUSTOM_STORED userStoredCard,
+			TAB_USER user
+		where
+			userStoredCard.UID = user.UID
+			and
+			userStoredCard.UID = #{uId}
+	  	limit 1
+	</select>
 </mapper>
