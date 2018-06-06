@@ -103,7 +103,7 @@ public class WeChatUserController extends BaseController {
          * 判断当前用户是否有预存账户或者储值卡账户,若有,则修改该用户的账户信息
          * */
         // 更新储值卡账户
-        WeChatUserStoredCard weChatUserStoredCard = weChatUserStoredCardService.getUserStoredCardByUid(weChatUser.getuId());
+        WeChatUserStoredCard weChatUserStoredCard = weChatUserStoredCardService.existOfCreditCardOfUserByUid(weChatUser.getuId());
         if (weChatUserStoredCard != null) {
             weChatUserStoredCard.setPhone(weChatUser.getPhone());
             weChatUserStoredCard.setName(weChatUser.getName());
@@ -149,8 +149,9 @@ public class WeChatUserController extends BaseController {
         ModelAndView mav = this.getModelAndView();
         HttpSession session = request.getSession();
 
-        // TODO 设置用户固定值,方便测试
-        session.setAttribute("uId", 86);
+        // TODO 设置用户编号,方便调试
+        session.setAttribute("uId", 17);
+
 
         Integer uId = (Integer) session.getAttribute("uId");
 

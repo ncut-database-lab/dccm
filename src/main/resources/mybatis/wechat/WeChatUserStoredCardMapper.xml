@@ -1,109 +1,152 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
-	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="WeChatUserStoredCardMapper">
-	<resultMap type="weChatUserStoredCard" id="weChatUserStoredCardResultMap">
-		<id property="cardId" column="cardId"/>
-		<result property="phone" column="phone"/>
-		<result property="remainMoney" column="remainMoney"/>
-		<result property="remainPoints" column="remainPoints"/>
-		<result property="name" column="name"/>
-		<result property="status" column="status"/>
-		<result property="password" column="password"/>
-		<association property="user" javaType="WeChatUser">
-			<id property="uId" column="uId"/>
-			<result property="name" column="name"/>
-			<result property="phone" column="phone"/>
-		</association>
-	</resultMap>
-	
-	<!-- 根据uId查询tb_custom_stored表中是否包含该用户 -->
-	<select id="getUserStoredCardByUid" parameterType="java.lang.Integer" resultMap="weChatUserStoredCardResultMap">
-		select
-			userStoredCard.CARD_ID as cardId,
-			userStoredCard.REMAIN_MONEY as remainMoney,
-			userStoredCard.REMAIN_POINTS as remainPoints,
-			userStoredCard.STATUS as status,
-			userStoredCard.PASSWORD as password,
-			user.UID as uId,
-			user.NAME as name,
-			user.PHONE as phone
-		from
-			TB_CUSTOM_STORED userStoredCard,
-			TAB_USER user
-		where
-			userStoredCard.UID = user.UID
-			and
-			userStoredCard.UID = #{uId}
-	</select>
-	
-	<!-- 创建一个新的储值账户 -->
-	<insert id="createNewUserStoredCard" parameterType="WeChatUserStoredCard">
-		insert into 
-			TB_CUSTOM_STORED(PHONE,UID,REMAIN_MONEY,REMAIN_POINTS,NAME,STATUS,PASSWORD)
-		values(#{user.phone},#{user.uId},#{remainMoney},#{remainPoints},#{user.name},#{status},#{password})
-	</insert>
-	
-	<!-- 更新账户的密码信息 -->
-	<update id="updateUserStoredCardPassword" parameterType="WeChatUserStoredCard">
-		update
-			TB_CUSTOM_STORED userStoredCard
-		set
-			userStoredCard.PASSWORD = #{password}
-		where
-			userStoredCard.CARD_ID = #{cardId}
-	</update>
-	
-	<!-- 更新用户储值卡账户余额 -->
-	<update id="updateUserStoredCardRemainMoneyAndPoints" parameterType="WeChatUserStoredCard">
-		update
-			TB_CUSTOM_STORED userStoredCard
-		set
-			userStoredCard.REMAIN_MONEY = #{remainMoney},
-			userStoredCard.REMAIN_POINTS = #{remainPoints}
-		where
-			userStoredCard.CARD_ID = #{cardId}
-	</update>
-	
-	<!-- 更新用户账户信息 -->
-	<update id="updateUserStoredCardPhoneAndName" parameterType="WeChatUserStoredCard">
-		update
-			TB_CUSTOM_STORED userStoredCard
-		set
-			userStoredCard.PHONE = #{phone},
-			userStoredCard.NAME = #{name}
-		where
-			userStoredCard.UID = #{uId}
-	</update>
+    <resultMap type="weChatUserStoredCard" id="weChatUserStoredCardResultMap">
+        <id property="cardId" column="cardId"/>
+        <result property="phone" column="phone"/>
+        <result property="remainMoney" column="remainMoney"/>
+        <result property="remainPoints" column="remainPoints"/>
+        <result property="name" column="name"/>
+        <result property="status" column="status"/>
+        <result property="password" column="password"/>
+        <association property="user" javaType="WeChatUser">
+            <id property="uId" column="uId"/>
+            <result property="name" column="name"/>
+            <result property="phone" column="phone"/>
+        </association>
+    </resultMap>
 
-	<update id="updatePasswordOfAllCreditCard" parameterType="WeChatUserStoredCard">
-		UPDATE
-			tb_custom_stored userStoredCard
-		SET
-			userStoredCard.PASSWORD = #{password}
-		WHERE
-			userStoredCard.UID = #{uId}
-		AND
-			userStoredCard.STATUS = #{status}
-	</update>
+    <!-- 根据uId查询tb_custom_stored表中是否包含该用户 -->
+    <select id="getUserStoredCardByUid" parameterType="java.lang.Integer" resultMap="weChatUserStoredCardResultMap">
+        SELECT
+            userStoredCard.CARD_ID       AS cardId,
+            userStoredCard.REMAIN_MONEY  AS remainMoney,
+            userStoredCard.REMAIN_POINTS AS remainPoints,
+            userStoredCard.STATUS        AS status,
+            userStoredCard.PASSWORD      AS password,
+            user.UID                     AS uId,
+            user.NAME                    AS name,
+            user.PHONE                   AS phone
+        FROM
+            TB_CUSTOM_STORED userStoredCard,
+            TAB_USER user
+        WHERE
+            userStoredCard.UID = user.UID
+            AND
+            userStoredCard.UID = #{uId}
+    </select>
 
-	<select id="existOfCreditCardOfUserByUid" parameterType="java.lang.Integer" resultMap="weChatUserStoredCardResultMap">
-		select
-			userStoredCard.CARD_ID as cardId,
-			userStoredCard.REMAIN_MONEY as remainMoney,
-			userStoredCard.REMAIN_POINTS as remainPoints,
-			userStoredCard.STATUS as status,
-			userStoredCard.PASSWORD as password,
-			user.UID as uId,
-			user.NAME as name,
-			user.PHONE as phone
-		from
-			TB_CUSTOM_STORED userStoredCard,
-			TAB_USER user
-		where
-			userStoredCard.UID = user.UID
-			and
-			userStoredCard.UID = #{uId}
-	  	limit 1
-	</select>
+    <!-- 创建一个新的储值账户 -->
+    <insert id="createNewUserStoredCard" parameterType="WeChatUserStoredCard">
+        INSERT INTO
+            TB_CUSTOM_STORED (PHONE, UID, REMAIN_MONEY, REMAIN_POINTS, NAME, STATUS, PASSWORD)
+        VALUES (#{user.phone}, #{user.uId}, #{remainMoney}, #{remainPoints}, #{user.name}, #{status}, #{password})
+    </insert>
+
+    <!-- 更新账户的密码信息 -->
+    <update id="updateUserStoredCardPassword" parameterType="WeChatUserStoredCard">
+        UPDATE
+            TB_CUSTOM_STORED userStoredCard
+        SET
+            userStoredCard.PASSWORD = #{password}
+        WHERE
+            userStoredCard.CARD_ID = #{cardId}
+    </update>
+
+    <!-- 更新用户储值卡账户余额 -->
+    <update id="updateUserStoredCardRemainMoneyAndPoints" parameterType="WeChatUserStoredCard">
+        UPDATE
+            TB_CUSTOM_STORED userStoredCard
+        SET
+            userStoredCard.REMAIN_MONEY  = #{remainMoney},
+            userStoredCard.REMAIN_POINTS = #{remainPoints}
+        WHERE
+            userStoredCard.CARD_ID = #{cardId}
+    </update>
+
+    <!-- 更新用户账户信息 -->
+    <update id="updateUserStoredCardPhoneAndName" parameterType="WeChatUserStoredCard">
+        UPDATE
+            TB_CUSTOM_STORED userStoredCard
+        SET
+            userStoredCard.PHONE = #{phone},
+            userStoredCard.NAME  = #{name}
+        WHERE
+            userStoredCard.UID = #{uId}
+    </update>
+
+    <update id="updatePasswordOfAllCreditCard" parameterType="WeChatUserStoredCard">
+        UPDATE
+            tb_custom_stored userStoredCard
+        SET
+            userStoredCard.PASSWORD = #{password}
+        WHERE
+            userStoredCard.UID = #{uId}
+            AND
+            userStoredCard.STATUS = #{status}
+    </update>
+
+    <select id="existOfCreditCardOfUserByUid" parameterType="java.lang.Integer"
+            resultMap="weChatUserStoredCardResultMap">
+        SELECT
+            userStoredCard.CARD_ID       AS cardId,
+            userStoredCard.REMAIN_MONEY  AS remainMoney,
+            userStoredCard.REMAIN_POINTS AS remainPoints,
+            userStoredCard.STATUS        AS status,
+            userStoredCard.PASSWORD      AS password,
+            user.UID                     AS uId,
+            user.NAME                    AS name,
+            user.PHONE                   AS phone
+        FROM
+            TB_CUSTOM_STORED userStoredCard,
+            TAB_USER user
+        WHERE
+            userStoredCard.UID = user.UID
+            AND
+            userStoredCard.UID = #{uId}
+        LIMIT 1
+    </select>
+
+    <!-- 查询某用户可用的余额以及返点 -->
+    <select id="getUserAssetsOfCreditCard" parameterType="java.lang.Integer" resultType="WeChatUserStoredCard">
+        SELECT
+            UID                AS uId,
+            SUM(REMAIN_MONEY)  AS remainMoney,
+            SUM(REMAIN_POINTS) AS remainPoints
+        FROM
+            tb_custom_stored userStoredCard
+        WHERE
+            UID = #{uId}
+            AND
+            `STATUS` = 0
+    </select>
+
+    <select id="queryCreditCardOfUserByUid" parameterType="java.lang.Integer" resultMap="weChatUserStoredCardResultMap">
+        SELECT
+            userStoredCard.CARD_ID       AS cardId,
+            userStoredCard.UID           AS uId,
+            userStoredCard.REMAIN_MONEY  AS remainMoney,
+            userStoredCard.REMAIN_POINTS AS remainPoints,
+            userStoredCard.STATUS        AS status,
+            userStoredCard.PASSWORD      AS password
+        FROM
+            TB_CUSTOM_STORED userStoredCard
+        WHERE
+            userStoredCard.UID = #{uId}
+            AND
+            userStoredCard.STATUS = 0
+        ORDER BY CARD_ID ASC
+    </select>
+
+    <update id="updateUserCreditCardByCardId" parameterType="WeChatUserStoredCard">
+        UPDATE
+            TB_CUSTOM_STORED userStoredCard
+        SET
+            REMAIN_MONEY  = #{remainMoney},
+            REMAIN_POINTS = #{remainPoints},
+            STATUS        = #{status}
+        WHERE
+            userStoredCard.CARD_ID = #{cardId}
+    </update>
 </mapper>

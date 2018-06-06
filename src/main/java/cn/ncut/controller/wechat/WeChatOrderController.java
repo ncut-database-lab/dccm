@@ -305,7 +305,7 @@ public class WeChatOrderController extends BaseController {
 		DecimalFormat df = new DecimalFormat("######0.00");
 		
 		Integer uId = (Integer)request.getSession().getAttribute("uId");
-		WeChatUserStoredCard weChatUserStoredCard = this.weChatUserStoredCardService.getUserStoredCardByUid(uId);
+		WeChatUserStoredCard weChatUserStoredCard = this.weChatUserStoredCardService.existOfCreditCardOfUserByUid(uId);
 		
 		ModelAndView mav = this.getModelAndView();
 		mav.addObject("weChatOrders", weChatOrders);
@@ -438,7 +438,7 @@ public class WeChatOrderController extends BaseController {
 		
 		String result = null;
 		
-		WeChatUserStoredCard weChatUserStoredCard = this.weChatUserStoredCardService.getUserStoredCardByUid(uId);
+		WeChatUserStoredCard weChatUserStoredCard = this.weChatUserStoredCardService.existOfCreditCardOfUserByUid(uId);
 		String newPassword = MD5Util.MD5Encode(password, "utf8");
 		if(!weChatUserStoredCard.getPassword().equals(newPassword)){
 			result = "{\"errorCode\":\"fail\",\"errorDes\":\"密码错误,请重新输入\"}";
@@ -458,7 +458,7 @@ public class WeChatOrderController extends BaseController {
 		logger.debug("--- 订单,支付方式,实付金额,优惠券信息如下 ---");
 		logger.debug(map.toString());
 		
-		result = this.weChatJsApiPayOrderService.storedCardPayOrder(map);
+		result = this.weChatJsApiPayOrderService.payOfStoredCard(map);
 		
 		return result;
 	}
