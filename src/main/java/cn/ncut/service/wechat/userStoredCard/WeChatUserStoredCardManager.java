@@ -2,6 +2,8 @@ package cn.ncut.service.wechat.userStoredCard;
 
 import cn.ncut.entity.wechat.pojo.WeChatUserStoredCard;
 
+import java.util.Map;
+
 public interface WeChatUserStoredCardManager {
     /**
      * 根据uId获取用户储值账户信息
@@ -51,4 +53,17 @@ public interface WeChatUserStoredCardManager {
      * @throws Exception 数据操作异常
      */
     WeChatUserStoredCard existOfCreditCardOfUserByUid(Integer uId) throws Exception;
+
+    /**
+     * 对外接口, 扣除储值卡余额与返点
+     *
+     * @param uId 用户编号
+     * @param money 支付金额
+     * @param storeId 门店编号
+     * @param staffId 员工编号
+     * @param extension 扩展
+     * @throws Exception 数据操作异常
+     */
+    boolean countCzkMoney(int uId, double money, String storeId, String staffId, Map<String, Object>
+            extension) throws Exception;
 }
