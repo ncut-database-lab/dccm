@@ -150,7 +150,7 @@ public class WeChatUserController extends BaseController {
         HttpSession session = request.getSession();
 
         // TODO 设置用户编号,方便调试
-        session.setAttribute("uId", 17);
+        // session.setAttribute("uId", 17);
 
 
         Integer uId = (Integer) session.getAttribute("uId");
