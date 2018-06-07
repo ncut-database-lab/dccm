@@ -70,7 +70,7 @@ public interface CustomStoredManager{
 	 * @param String phone
 	 * @throws Exception
 	 */
-	public PageData findByPhone(String phone)throws Exception;
+	public List<PageData> findByPhone(String phone)throws Exception;
 	
 	
 	
@@ -86,7 +86,7 @@ public interface CustomStoredManager{
 	 */
 
 	public List<PageData> finaAll(Page page)throws Exception;
-	public PageData findByUid(int uid)throws Exception;
+	public List<PageData> findByUid(int uid)throws Exception;
 
 	public void saveMx(PageData pd) throws Exception;
 	
@@ -121,6 +121,8 @@ public interface CustomStoredManager{
 	 * @param pd
 	 */
 	public List<PageData> finaAllExcel(PageData pd) throws Exception;
+	
+	public PageData findByUidGroupByUid(int uid)throws Exception;
 	
 }
 

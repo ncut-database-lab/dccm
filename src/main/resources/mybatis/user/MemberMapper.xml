@@ -187,7 +187,7 @@
 		select 
 			a.uid,a.name,a.username,a.proportion,a.phone,a.remark,
   			b.CATEGORY_NAME,b.PROPORTION as categoryproportion,
- 			c.REMAIN_MONEY,c.REMAIN_POINTS,
+ 			sum(c.REMAIN_MONEY) as REMAIN_MONEY,sum(c.REMAIN_POINTS) as REMAIN_POINTS,
 			d.SUM_MONEY
 		from 
 			tab_user a LEFT OUTER JOIN tb_usercategory b 
@@ -196,6 +196,7 @@
 		LEFT OUTER JOIN tb_prestore d on a.uid=d.UID 
 		where 
 			a.uid=#{uid}
+			group by uid
 	
 	</select>
 	
@@ -402,7 +403,7 @@
 		a.first_date,	
 		a.usercategory_id,
 		a.proportion,		
-		a.uid,b.SUM_MONEY,c.remain_money,c.remain_points,d.CATEGORY_NAME,d.PROPORTION as category_porportion
+		a.uid,b.SUM_MONEY,sum(c.remain_money) as remain_money,sum(c.remain_points) as remain_points,d.CATEGORY_NAME,d.PROPORTION as category_porportion
 		from tab_user a LEFT JOIN tb_prestore b on a.uid = b.UID 
 		LEFT JOIN tb_custom_stored c on a.uid =c.uid 
 		LEFT JOIN tb_usercategory d on a.usercategory_id=d.USERCATEGORY_ID
@@ -417,7 +418,9 @@
 					a.username LIKE CONCAT(CONCAT('%', #{pd.keywords}),'%') 
 				
 				)
+				
 		</if>
+		group by a.uid
 	</select>
 	
 	<!--查询客户的基本信息，所属类别信息，用户的积分，用户的储值卡信息-->

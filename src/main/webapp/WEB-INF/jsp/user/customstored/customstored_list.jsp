@@ -100,7 +100,7 @@
 													<i class="ace-icon fa fa-camera-retro bigger-120" title="生成二维码"></i>
 												</a> --%>
 												
-												<a class="btn btn-xs btn-success" title="修改储值卡密码" onclick="edit('${var.UID}');">
+												<a class="btn btn-xs btn-success" title="修改储值卡密码" onclick="edit('${var.CARD_ID}');">
 													<i class="ace-icon fa fa-pencil-square-o bigger-120" title="修改储值卡密码"></i>
 												</a>
 											</td>
@@ -311,7 +311,7 @@
 			 var diag = new top.Dialog();
 			 diag.Drag=true;
 			 diag.Title ="编辑";
-			 diag.URL = '<%=basePath%>customstored/goEdit.do?UID='+Id;
+			 diag.URL = '<%=basePath%>customstored/goEdit.do?CARD_ID='+Id;
 			 diag.Width = 450;
 			 diag.Height = 355;
 			 diag.Modal = true;				//有无遮罩窗口
