@@ -279,7 +279,7 @@
 			 diag.Drag=true;
 			 diag.Title ="新增";
 			 diag.URL = '<%=basePath%>servicecost/goAdd.do';
-			 diag.Width = 550;
+			 diag.Width = 700;
 			 diag.Height = 655;
 			 diag.Modal = true;				//有无遮罩窗口
 			 diag. ShowMaxButton = true;	//最大化按钮
