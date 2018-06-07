@@ -108,6 +108,10 @@
 			and
 			a.PID=b.PROJECT_ID
 			and a.STATUS='1'
+		<if test="PNAME != '-1'">
+		AND
+		b.PNAME LIKE CONCAT(CONCAT('%', #{PNAME}),'%')
+		</if>
 	</select>
 	
 	<!-- 通过pid获取数据 -->

@@ -65,7 +65,7 @@
 		set 
 		PASSWORD = #{PASSWORD}
 		where 
-		UID = #{UID}
+		UID = #{UID} and CARD_ID = #{CARD_ID}
 	</update>
 	
 	
@@ -146,6 +146,16 @@
 		<include refid="tableName"></include>
 		where 
 			UID = #{uid}
+	</select>
+	<!-- 根据uid查询 -->
+	<select id="findByUidGroupByUid" parameterType="Integer" resultType="pd">
+		select 
+		<include refid="Field"></include>
+		from 
+		<include refid="tableName"></include>
+		where 
+			UID = #{uid}
+			 group by UID
 	</select>
 	
 	<!-- 列表 -->

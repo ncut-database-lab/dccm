@@ -91,20 +91,24 @@ public class CustomStoredService implements CustomStoredManager{
 	 * @throws Exception
 	 */
 	public PageData findByCARDId(PageData pd)throws Exception{
-		return (PageData)dao.findForObject("CustomStoredMapper.findByCARDId", pd);
+		return (PageData) dao.findForObject("CustomStoredMapper.findByCARDId", pd);
 	}
 	
 	/**通过CARD_ID获取数据
 	 * @param pd
 	 * @throws Exception
 	 */
-	public PageData findByPhone(String phone)throws Exception{
-		return (PageData)dao.findForObject("CustomStoredMapper.findByPhone", phone);
+	public List<PageData> findByPhone(String phone)throws Exception{
+		return (List<PageData>)dao.findForList("CustomStoredMapper.findByPhone", phone);
 	}
 	
 	
-	public PageData findByUid(int uid)throws Exception{
-		return (PageData)dao.findForObject("CustomStoredMapper.findByUid", uid);
+	public List<PageData> findByUid(int uid)throws Exception{
+		return (List<PageData>)dao.findForList("CustomStoredMapper.findByUid", uid);
+	}
+	
+	public PageData findByUidGroupByUid(int uid)throws Exception{
+		return (PageData)dao.findForObject("CustomStoredMapper.findByUidGroupByUid", uid);
 	}
 	/**批量删除
 	 * @param ArrayDATA_IDS
@@ -137,10 +141,11 @@ public class CustomStoredService implements CustomStoredManager{
 	public void updateUserStoreded(PageData sell_pd, PageData customstoredpd, PageData categorypd)
 			throws Exception {
 		dao.save("StoredDetailMapper.save", sell_pd);
-		if (customstoredpd != null) {
+		if (customstoredpd != null) {//如果之前有用户
 			sell_pd.put("REMAIN_MONEY", categorypd.get("STORED_MONEY")); // 余额
 			sell_pd.put("REMAIN_POINTS", categorypd.get("RETURN_POINTS"));
-			dao.update("CustomStoredMapper.edit", sell_pd);
+			sell_pd.put("STATUS", "0");
+			dao.save("CustomStoredMapper.save", sell_pd);
 		} else {
 			sell_pd.put("REMAIN_MONEY", categorypd.get("STORED_MONEY")); // 余额
 			sell_pd.put("REMAIN_POINTS", categorypd.get("RETURN_POINTS")); // 剩余点数

@@ -85,14 +85,15 @@ public class CustomStoredController extends BaseController {
 		p.put("UID", Integer.parseInt(pd.getString("UID")));
 		PageData userpd = memberService.findById(p);
 		
-		PageData custompd = customstoredService.findByUid(Integer.parseInt(pd.getString("UID")));
-		//新增用户储值卡信息时该用户已经存在，则将添加的钱加到该用户的余额中
+		PageData custompd = customstoredService.findByUidGroupByUid(Integer.parseInt(pd.getString("UID")));
+		//新增用户储值卡信息时该用户已经存在，则为用户新建立一张储值卡（修改后）
 		if(custompd!=null){
-			custompd.put("REMAIN_MONEY", Double.parseDouble(pd.getString("REMAIN_MONEY"))+(Double)custompd.get("REMAIN_MONEY"));
-			custompd.put("REMAIN_POINTS", Double.parseDouble(pd.getString("REMAIN_POINTS"))+(Double)custompd.get("REMAIN_POINTS"));
+			custompd.put("REMAIN_MONEY", Double.parseDouble(pd.getString("REMAIN_MONEY")));
+			custompd.put("REMAIN_POINTS", Double.parseDouble(pd.getString("REMAIN_POINTS")));
 			custompd.put("STATUS","0");
 			custompd.put("NAME",userpd.get("name"));
-			customstoredService.editSubMoney(custompd);
+			pd.put("PASSWORD", MD5Util.MD5Encode("123456", "utf8"));
+			customstoredService.save(custompd);
 		}else{
 			//新增用户储值卡信息时该用户不存在，则新添加一条记录
 			pd.put("STATUS", "0");
@@ -363,7 +364,7 @@ public class CustomStoredController extends BaseController {
 		ModelAndView mv = this.getModelAndView();
 		PageData pd = new PageData();
 		pd = this.getPageData();
-		pd = customstoredService.findByUid(Integer.parseInt(pd.getString("UID")));	//根据ID读取
+		pd = customstoredService.findByCARDId(pd);	//根据ID读取
 		mv.setViewName("user/customstored/updatePassword");
 		mv.addObject("msg", "edit");
 		mv.addObject("pd", pd);

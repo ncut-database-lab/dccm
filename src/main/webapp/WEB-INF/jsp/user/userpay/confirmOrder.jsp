@@ -63,7 +63,7 @@
 							<table id="table_report"
 								class="table table-striped table-bordered table-hover">
 								<input type="hidden" name="UID" id="UID" value="${pd.uid}" />
-								<input type="text" name="lowProportion" id="lowProportion" value="${lowProportion}" />
+								<input type="hidden" name="lowProportion" id="lowProportion" value="${lowProportion}" />
 								<span id="costIdAndNum" hidden>${costIdAndNumJson}</span>
 								<input type="hidden" name="token" id="token" value="${token}" />
 								<tr>
@@ -531,11 +531,7 @@
 					alert("请填写储值卡密码！");
 					return;
 				}
-			} */
-			
-			alert($("#lowProportion").val());
-		
-			alert(document.getElementById("lowProportion").value);
+			} */			
 			bootbox.confirm(msg, function(result) {
 				if (result) {
 				 	$("#zhongxin").hide();
