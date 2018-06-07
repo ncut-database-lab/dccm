@@ -149,7 +149,7 @@
 								</c:if>
 							</c:forEach>
 						</select>
-						下单次数：<input type="text" name="order_num" id="order_num" value="1"  min="1" maxlength="255" placeholder="这里输入次数" title="次数">
+						
 					   </div>
 					   
 					   <div id="projectcost" style="width:100%;text-align:left;margin-top:20px;">
@@ -170,6 +170,8 @@
 									<th class="center">项目名称</th>
 									<th class="center">价格</th>
 									<th class="center">类型</th>
+									<th class="center">次数</th>
+									
 								</tr>
 							</thead>
 													
@@ -339,7 +341,7 @@
 						var td1 = document.createElement("td");
 						td1.className = "center";
 						var radio = document.createElement("input");
-						radio.setAttribute("type","radio");
+						radio.setAttribute("type","checkbox");
 						radio.setAttribute("name","project");
 						radio.setAttribute("money",data[t].PRICE);
 						
@@ -368,10 +370,21 @@
 							
 						}
 						
+						var cishu = document.createElement("input");
+						cishu.setAttribute("type","number");
+						cishu.setAttribute("min","1");
+						cishu.value = 1;
+						cishu.setAttribute("id","cishu-"+data[t].SERVICECOST_ID);
+						
+						var td5 = document.createElement("td");
+						td5.className="center";
+						td5.appendChild(cishu);
+						
 						tr.appendChild(td1);
 						tr.appendChild(td2);
 						tr.appendChild(td3);
 						tr.appendChild(td4);
+						tr.appendChild(td5);
 						$("#projectcost_tbody").append(tr);
 					}
 					$(top.hangge());//关闭加载状态
@@ -483,8 +496,18 @@
 	 	//进行确认订单
 	 	function sell(){
 	 		var uid = $('input[name="uid"]:checked').val(); 
-			var projectcost_id = $('input[name="project"]:checked').val();
-			var order_num = $("#order_num").val(); 
+			//var projectcost_id = $('input[name="project"]:checked').val();
+			
+			var id = document.getElementsByName('project');
+    		var projectcost_id = new Array();
+    		for(var i = 0; i < id.length; i++){
+     			if(id[i].checked){
+     				projectcost_id.push({"cost_id":id[i].value,"cishu":$('#cishu-'+id[i].value).val()});  
+     			}
+    		} 
+    		var costAndNum = JSON.stringify(projectcost_id);
+    		alert(costAndNum);
+					 
 			if(uid==undefined){
 				alert("请选择用户！");
 				return;
@@ -493,22 +516,19 @@
 				alert("请选择服务项目！");
 				return;
 			}
-			if(order_num==undefined){
-				alert("请填写次数！");
-				return;
-			}
+			
 			if(servicetime==undefined){
 				alert("请选择预约时间！");
 				return;
 			}
 			
 	 		
-	 		if(uid!=undefined && projectcost_id!=undefined && order_num!=undefined && servicetime!=undefined){
+	 		if(uid!=undefined && projectcost_id!=undefined  && servicetime!=undefined){
 	 			 top.jzts();
 				 var diag = new top.Dialog();
 				 diag.Drag=true;
 				 diag.Title ="确认订单";
-				 diag.URL = '<%=basePath%>userpay/confirmAndPayOrder.do?uid='+uid+'&SERVICECOST_ID='+projectcost_id+'&orderNum='+order_num+'&servicetime='+correctservicetime;
+				 diag.URL = '<%=basePath%>userpay/confirmAndPayOrder.do?uid='+uid+'&SERVICECOST_ID='+escape(costAndNum)+'&servicetime='+correctservicetime;
 				 diag.Width = 1200;
 				 diag.Height = 1000;
 				 diag.Modal = true;				//有无遮罩窗口

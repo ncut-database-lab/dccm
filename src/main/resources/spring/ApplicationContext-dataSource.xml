@@ -63,11 +63,9 @@
 	  
 	<!-- 事物处理 -->
 	<aop:config>
-		<aop:pointcut id="pc" expression="execution(* cn.ncut.service..*(..))" />
-		<aop:pointcut id="pc1" expression="execution(* cn.ncut.controller.user.userpay..*(..))" />
+		<aop:pointcut id="pc" expression="execution(* cn.ncut.service..*(..))" />	
 		<aop:pointcut id="pc2" expression="execution(* cn.ncut.controller.user.order..*(..))" />
 		<aop:advisor pointcut-ref="pc" advice-ref="txAdvice" />
-		<aop:advisor pointcut-ref="pc1" advice-ref="txAdvice1" />
 		<aop:advisor pointcut-ref="pc2" advice-ref="txAdvice2" />
 		<aop:aspect ref="transactionProcessWatcher">
 			<aop:pointcut expression="execution(* cn.ncut.controller.wechat.WeChatOrderController.payOrder(..)) or 
@@ -88,6 +86,8 @@
 			           rollback-for="java.lang.Exception" />
 			<tx:method name="save*" propagation="REQUIRED" read-only="false" 
 			           rollback-for="java.lang.Exception" />
+			<tx:method name="create*" propagation="REQUIRED" read-only="false" 
+			           rollback-for="java.lang.Exception" />           
 		</tx:attributes>
 	</tx:advice>
 	

@@ -63,8 +63,8 @@
 							<table id="table_report"
 								class="table table-striped table-bordered table-hover">
 								<input type="hidden" name="UID" id="UID" value="${pd.uid}" />
-								<input type="hidden" name="servicecostId" id="servicecostId" value="${pd.SERVICECOST_ID}" />
-								<input type=hidden name="PID" id="PID" value="${costPd.PID}" />
+								<input type="text" name="lowProportion" id="lowProportion" value="${lowProportion}" />
+								<span id="costIdAndNum" hidden>${costIdAndNumJson}</span>
 								<input type="hidden" name="token" id="token" value="${token}" />
 								<tr>
 									<td style="width:150px;text-align: right;padding-top: 13px;">姓名:</td>
@@ -80,13 +80,13 @@
 								</tr>
 								<tr>
 									<td style="width:150px;text-align: right;padding-top: 13px;">最低折扣:</td>
-									<td><span id="lowProportion">${lowProportion}</span>
+									<td><span>${lowProportion}</span>
 									</td>
 								</tr>
 								<tr>
 									<td style="width:150px;text-align: right;padding-top: 13px;">储值卡总剩余:</td>
 									<td>
-										<span id="lowProportion">
+										<span>
 											<fmt:formatNumber type="number" value="${userpd.REMAIN_MONEY+userpd.REMAIN_POINTS}" pattern="0.00" maxFractionDigits="2"/>
 											&nbsp;&nbsp;元</span>
 									</td>
@@ -118,20 +118,25 @@
 								</tr>
 								<tr>
 									<td style="width:150px;text-align: right;padding-top: 13px;">医生：</td>
-									<td><span id="staffId">${costPd.STAFF_NAME}</span>
+									<td><span id="staffId">${doctor}</span>
 									</td>
 								</tr>
 								<tr>
-									<td style="width:150px;text-align: right;padding-top: 13px;">预约项目：</td>
-									<td>${costPd.PNAME}</td>
-								</tr>
-								<tr>
-									<td style="width:150px;text-align: right;padding-top: 13px;">项目单价:</td>
-									<td>${costPd.PRICE} 元</td>
-								</tr>
-								<tr>
-									<td style="width:150px;text-align: right;padding-top: 13px;">预约次数:</td>
-									<td><span id="orderNum">${pd.orderNum}</span> 次</td>
+								<td style="width:150px;text-align: right;padding-top: 13px;">项目确认</td>
+								<td>
+									<table id="simple-table" class="table table-striped table-bordered table-hover">
+										<tr>
+											<th>项目/单价</th>
+											<th>次数</th>
+										</tr>
+										<c:forEach var="item" items="${costMap}">  
+										<tr>
+											<td>${item.key}</td>
+											<td>${item.value}</td>
+										</tr>
+										</c:forEach>
+									</table>
+								</td>
 								</tr>
 								<tr>
 									<td style="width:150px;text-align: right;padding-top: 13px;">预约时间:</td>
@@ -152,13 +157,12 @@
 										<div class="groupDiv">
 											<c:forEach items="${discountGroupPdList}" var="discountgroup">
 												<div>
-													<c:if test="${discountgroup.sum!=0}">
+													<%-- <c:if test="${discountgroup.sum!=0}"> --%>
 													<div group="${discountgroup.discount_group_id}"
 														style="color:red;font-size:16px;cursor:pointer;">
-														<img
-															src="${pageContext.request.contextPath}/static/images/libao.png"
-															style="width:38px;height:38pd;float:left;"> <span
-															style="width:240px;padding:10px;float:left;">${discountgroup.GROUP_NAME}</span>
+														<img src="${pageContext.request.contextPath}/static/images/libao.png"
+															style="width:38px;height:38pd;float:left;"> 
+															<span style="width:240px;padding:10px;float:left;">${discountgroup.GROUP_NAME}</span>
 														<div style="clear:both;"></div>
 													</div>
 													<div name="xz" style="display:none">
@@ -201,7 +205,7 @@
 															</c:forEach>
 														</table>
 													</div>
-													</c:if>
+													<%-- </c:if> --%>
 												</div>
 											</c:forEach>
 										</div></td>
@@ -325,7 +329,7 @@
 	<script src="static/ace/js/date-time/bootstrap-datepicker.js"></script>
 	<!--提示框-->
 	<script type="text/javascript" src="static/js/jquery.tips.js"></script>
-	<script type="text/javascript">
+	<script type="text/javascript" defer="defer">
 		$(top.hangge());//关闭加载状态
 	
 		$(document).ready(function() {
@@ -529,6 +533,9 @@
 				}
 			} */
 			
+			alert($("#lowProportion").val());
+		
+			alert(document.getElementById("lowProportion").value);
 			bootbox.confirm(msg, function(result) {
 				if (result) {
 				 	$("#zhongxin").hide();
@@ -538,11 +545,12 @@
 						url : "userpay/createOrder.do",
 						data : {
 							UID : $("#UID").val(),
+							proportion : $("#lowProportion").val(),
 							servicetime : $("#serviceTime").text(),
-							ordeNum : $("#orderNum").text(),
-							SERVICECOST_ID : $("#servicecostId").val(),
+							costIdAndNum : $("#costIdAndNum").text(),
 							DiscountJson : $("#jsonDiscount").val(),
 							DiscountMoney : $("#DiscountMoney").text(),
+							needMoney : $("#needMoney").text(),
 							REMARK : $("#REMARK").val(),
 							WECHATPAY_MONEY : wechatpay_money,
 							ALIPAY_MONEY : alipay_money,
@@ -553,11 +561,11 @@
 							token:token
 							/* password:$("#czk_password_value").val() */
 						},
-						dataType:"json",
+
 						cache:false,
 						success : function(data) {
 							console.log(data);
-							if(data.success){
+							if(data.code === '200'){
 								 bootbox.dialog({
 									message: "<span class='bigger-110'>创建订单成功!</span>",    
 									buttons: 			
@@ -576,7 +584,7 @@
 								
 							}else{
 								bootbox.dialog({
-									message: "<span class='bigger-110'>创建订单失败! 可能是用户储值卡或者钱包余额不足，也可能是密码填写错误 </span>",    
+									message: "<span class='bigger-110'>创建订单失败!</span>",    
 								});
 							}
 						}

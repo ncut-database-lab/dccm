@@ -1,6 +1,7 @@
 package cn.ncut.service.user.order;
 
 import java.util.List;
+import java.util.Map;
 
 import cn.ncut.entity.Page;
 import cn.ncut.entity.system.QueryOrder;
@@ -195,6 +196,8 @@ public interface OrderManager{
 	 *@date 2017-7-30下午9:15:44
 	 */
 	public Integer findCountByUser(PageData pd) throws Exception;
+
+	public void createOrder(Map<String, List<Double>> map, PageData pd) throws Exception;
 
 
 }
