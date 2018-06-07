@@ -155,13 +155,13 @@ public class UserPayController extends BaseController {
 
 		PageData pd = new PageData();
 		pd = this.getPageData();
+		pd.put("PNAME", new String(pd.getString("PNAME").getBytes("ISO-8859-1"), "utf-8"));
 
 		// 得到当前的客服的门店编号
 		Session session = Jurisdiction.getSession();
 
 		// 在服务标准表中查询所属门店的当前选中医生的所有项目
-		List<PageData> pdlist = servicecostService
-				.findServiceAndCostByStaff_id(pd);
+		List<PageData> pdlist = servicecostService.findServiceAndCostByStaff_id(pd);
 		String s = new ObjectMapper().writeValueAsString(pdlist);
 
 		response.setContentType("text/xml;charset=UTF-8");

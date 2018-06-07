@@ -315,21 +315,18 @@
 		}
 		
 		function tosearchServiceProject(){
-			console.log(serviceproject_json);
 			var cx = $("#searchProject").val();
-			for(var i in serviceproject_json){
-				if(serviceproject_json[i].PNAME.indexOf(cx)==-1){
-					$("#servicecost"+serviceproject_json[i].SERVICECOST_ID).hide();
-				}
-			}
+			var staff_id = $("#STAFF_ID").val();
+			refreshProjectCost(staff_id, cx);						
 		}
 		
 		//选择医生和服务项目
-		function refreshProjectCost(staffid){
+		function refreshProjectCost(staffid,pname){
+			var pname=arguments[1]?arguments[1]:-1;
 			$("#projectcost_tbody").html("");
 			$.ajax({
 				url:'userpay/refreshProjectCostBySId.do',
-				data:{STAFF_ID:staffid},
+				data:{STAFF_ID:staffid, PNAME:pname},
 				method:'POST',
 				dataType:'json',
 				success:function(data){
@@ -506,7 +503,6 @@
      			}
     		} 
     		var costAndNum = JSON.stringify(projectcost_id);
-    		alert(costAndNum);
 					 
 			if(uid==undefined){
 				alert("请选择用户！");
