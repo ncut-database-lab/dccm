@@ -1,5 +1,7 @@
 package cn.ncut.util;
 
+import java.util.List;
+
 /**
  * 
 *
@@ -12,6 +14,17 @@ package cn.ncut.util;
  */
 
 public class StringUtil {
+	
+	/**
+	 * 累加list里的每个值
+	 */
+	public static double countList(List<Double> list){
+		double number = 0.0;
+		for(double d : list){
+			number += d;
+		}
+		return number;
+	}
 
 	/**
 	 * 将以逗号分隔的字符串转换成字符串数组
