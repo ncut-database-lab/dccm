@@ -263,7 +263,7 @@
 		</if>
 				
 		<if test="pd.ORDER_STATUS==null or pd.ORDER_STATUS ==''">
-			and a.ORDER_STATUS in (2,3)	
+			and a.ORDER_STATUS in (2,3,4,5)	
 		</if>		
 		<if test="pd.ORDER_STATUS!=null and pd.ORDER_STATUS !=''">
 			and a.ORDER_STATUS=#{pd.ORDER_STATUS}	

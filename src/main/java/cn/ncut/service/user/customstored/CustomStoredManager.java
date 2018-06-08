@@ -124,5 +124,7 @@ public interface CustomStoredManager{
 	
 	public PageData findByUidGroupByUid(int uid)throws Exception;
 	
+	public PageData findStoredByUidGroupByUid(int uid)throws Exception;
+	
 }
 
