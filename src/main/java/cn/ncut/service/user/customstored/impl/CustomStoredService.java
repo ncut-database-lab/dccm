@@ -110,6 +110,10 @@ public class CustomStoredService implements CustomStoredManager{
 	public PageData findByUidGroupByUid(int uid)throws Exception{
 		return (PageData)dao.findForObject("CustomStoredMapper.findByUidGroupByUid", uid);
 	}
+	
+	public PageData findStoredByUidGroupByUid(int uid)throws Exception{
+		return (PageData)dao.findForObject("CustomStoredMapper.findByUidGroupByUid", uid);
+	}
 	/**批量删除
 	 * @param ArrayDATA_IDS
 	 * @throws Exception

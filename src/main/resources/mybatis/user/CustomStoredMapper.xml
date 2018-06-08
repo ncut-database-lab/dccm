@@ -158,6 +158,18 @@
 			 group by UID
 	</select>
 	
+	<!-- 根据uid查询 -->
+	<select id="findStoredByUidGroupByUid" parameterType="Integer" resultType="pd">
+		select 
+		sum(REMAIN_MONEY) as REMAIN_MONEY,	
+		sum(REMAIN_POINTS) as REMAIN_POINTS,	
+		from 
+		<include refid="tableName"></include>
+		where 
+			UID = #{uid}
+			 group by UID
+	</select>
+	
 	<!-- 列表 -->
 
 

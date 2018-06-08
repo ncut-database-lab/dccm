@@ -33,6 +33,7 @@ import cn.ncut.service.user.order.OrderManager;
 import cn.ncut.service.user.order.OrderMxManager;
 import cn.ncut.service.user.storeddetail.StoredDetailManager;
 import cn.ncut.service.user.userdiscount.UserDiscountManager;
+import cn.ncut.service.wechat.userStoredCard.impl.WeChatUserStoredCardService;
 import cn.ncut.util.BigDecimalUtil;
 import cn.ncut.util.Const;
 import cn.ncut.util.DateUtil;
@@ -87,6 +88,9 @@ public class PayMedicinalController extends BaseController {
 
 	@Resource(name = "storeddetailService")
 	private StoredDetailManager storeddetailService;
+	
+	@Resource(name = "weChatUserStoredCardService")
+	private WeChatUserStoredCardService weChatUserStoredCardService;
 
 	// 菜单进入地址，初始化页面
 	@RequestMapping(value = "/show")
@@ -170,7 +174,8 @@ public class PayMedicinalController extends BaseController {
 		//得到用户的储值卡信息
 		PageData czkpd = new PageData();
 		czkpd.put("UID", pd.getString("UID"));
-		czkpd = customstoredService.findById(czkpd);
+		//czkpd = customstoredService.findById(czkpd);
+		czkpd = customstoredService.findStoredByUidGroupByUid(Integer.parseInt(czkpd.getString("UID")));
 		double czkRemainMoney;
 		if(czkpd!=null){
 		czkRemainMoney = (Double)czkpd.get("REMAIN_MONEY");
@@ -275,65 +280,12 @@ public class PayMedicinalController extends BaseController {
 			//储值卡支付，两种明细 
 			//2 代表储值卡余额支付    6代表储值卡返点支付
 			if (!"".equals(pd.getString("STOREDPAY_MONEY")) && !"0".equals(pd.getString("STOREDPAY_MONEY")) && pd.get("STOREDPAY_MONEY") != null) {
-				//减少该用户的储值卡金额，先扣除储值卡余额，再扣除返点余额,插入储值卡的明细
+				//插入储值卡支付的订单明细
+				order_pd.put("STOREDPAY_MONEY", pd.getString("STOREDPAY_MONEY"));
+				insertPayDetail(order_pd,2,df.format(Double.parseDouble(order_pd.getString("STOREDPAY_MONEY"))));
 				
-				//该次订单储值卡需要支付的金额
-				double czkMoney = Double.parseDouble(df.format(Double.parseDouble(pd.getString("STOREDPAY_MONEY"))));//这次需要交的储值卡的钱
-				
-				if(czkMoney<=czkRemainMoney){
-					//储值卡本身的余额已经足够支付这次,先插入订单支付明细   
-					order_pd.put("STOREDPAY_MONEY", czkMoney);
-					insertPayDetail(order_pd,2,df.format(order_pd.get("STOREDPAY_MONEY")));
-					
-					//再减去储值卡本身的余额	
-					czkRemainMoney = Double.parseDouble(df.format(czkRemainMoney-czkMoney));//000000000
-					
-					
-					//插入储值卡消费明细
-					PageData czkmx_pd = new PageData();
-					czkmx_pd.put("STOREDDETAIL_ID", "OC"+PrimaryKeyGenerator.generateKey());
-					czkmx_pd.put("UID", pd.getString("UID"));
-					czkmx_pd.put("STORE_ID", staff.getSTORE_ID());
-					czkmx_pd.put("STAFF_ID", staff.getSTAFF_ID());
-					czkmx_pd.put("CREATE_TIME", DateUtil.getTime());
-					czkmx_pd.put("MONEY", czkMoney);
-					czkmx_pd.put("POINTS", 0);
-					czkmx_pd.put("TYPE", 5);
-					czkmx_pd.put("STATUS", 0);//0是成功
-					storeddetailService.save(czkmx_pd);
-				}else{
-					//储值卡本身的余额不够支付这次，需要从返点金额里扣除不足的部分，同时插入用返点支付的订单明细
-					//还需支付的钱
-					double hm = Double.parseDouble(df.format(czkMoney - czkRemainMoney));  
-					//double pointsmm = (Double)czkpd.get("REMAIN_POINTS") - hm;
-					
-					//先插入储值卡余额的消费明细
-					if(czkRemainMoney>0){
-						order_pd.put("STOREDPAY_MONEY",czkRemainMoney);
-						insertPayDetail(order_pd,2,df.format((order_pd.get("STOREDPAY_MONEY"))));
-						
-					}
-					
-					//再插入储值卡返点的消费明细
-					order_pd.put("POINTS_MONEY",Double.parseDouble(df.format(hm)));
-					insertPayDetail(order_pd,6,df.format((order_pd.get("POINTS_MONEY"))));
-					
-					
-					//插入储值卡消费明细
-					PageData czkmx_pd = new PageData();
-					czkmx_pd.put("STOREDDETAIL_ID", "OC"+PrimaryKeyGenerator.generateKey());
-					czkmx_pd.put("UID", pd.getString("UID"));
-					czkmx_pd.put("STORE_ID", staff.getSTORE_ID());//客服的门店编号
-					czkmx_pd.put("STAFF_ID", staff.getSTAFF_ID());
-					czkmx_pd.put("CREATE_TIME", DateUtil.getTime());
-					czkmx_pd.put("MONEY", czkRemainMoney);   //修改了
-					czkmx_pd.put("POINTS", Double.parseDouble(df.format(hm)));
-					czkmx_pd.put("TYPE", 5);//线下消费
-					czkmx_pd.put("STATUS", 0);
-					storeddetailService.save(czkmx_pd);
-					
-					czkRemainMoney = Double.parseDouble("0.00");//000000000
-				}
+				//扣除储值卡的钱，并插入明细
+				weChatUserStoredCardService.countCzkMoney(Integer.parseInt(order_pd.getString("UID")), Double.parseDouble(order_pd.getString("STOREDPAY_MONEY")), order_pd.getString("STORE_ID"), order_pd.getString("SERVICE_STAFF_ID"), null);
 			}
 			
 			
@@ -352,7 +304,7 @@ public class PayMedicinalController extends BaseController {
 		 * 有n次订单，使用储值卡总金额为money,那么储值卡金额要减去money
 		 * 但是要插入n次订单支付方式和n次储值卡明细，每次的金额为money/n
 		 */
-		if (!"".equals(pd.getString("STOREDPAY_MONEY")) && !"0".equals(pd.getString("STOREDPAY_MONEY")) && pd.get("STOREDPAY_MONEY") != null) {
+	/*	if (!"".equals(pd.getString("STOREDPAY_MONEY")) && !"0".equals(pd.getString("STOREDPAY_MONEY")) && pd.get("STOREDPAY_MONEY") != null) {
 			
 			//用户用储值卡支付的钱
 			double user_STOREDPAY_MONEY = Double.parseDouble(pd.getString("STOREDPAY_MONEY"));
@@ -369,7 +321,7 @@ public class PayMedicinalController extends BaseController {
 				czkpd.put("REMAIN_POINTS", pointsmm);
 			}
 			customstoredService.editSubMoney(czkpd);
-		}
+		}*/
 		
 		
 		if (!"".equals(pd.getString("PRESTOREPAY_MONEY")) && !"0".equals(pd.getString("PRESTOREPAY_MONEY")) && pd.get("PRESTOREPAY_MONEY") != null) {
@@ -435,7 +387,7 @@ public class PayMedicinalController extends BaseController {
 		//得到用户的储值卡信息
 		PageData czkpd = new PageData();
 		czkpd.put("UID", pd.getString("UID"));
-		czkpd = customstoredService.findById(czkpd);
+		czkpd = customstoredService.findStoredByUidGroupByUid(Integer.parseInt(czkpd.getString("UID")));
 		double czkRemainMoney;
 		if(czkpd!=null){
 		czkRemainMoney = (Double)czkpd.get("REMAIN_MONEY");
@@ -538,8 +490,17 @@ public class PayMedicinalController extends BaseController {
 			
 			
 			//储值卡支付，两种明细 
-			//2 代表储值卡余额支付    6代表储值卡返点支付
 			if (!"".equals(pd.getString("STOREDPAY_MONEY")) && !"0".equals(pd.getString("STOREDPAY_MONEY")) && pd.get("STOREDPAY_MONEY") != null) {
+				//插入储值卡支付的订单明细
+				
+				order_pd.put("STOREDPAY_MONEY", pd.getString("STOREDPAY_MONEY"));
+				insertPayDetail(order_pd,2,df.format(Double.parseDouble(order_pd.getString("STOREDPAY_MONEY"))));
+				
+				//扣除储值卡的钱，并插入明细
+				weChatUserStoredCardService.countCzkMoney(Integer.parseInt(order_pd.getString("UID")), Double.parseDouble(order_pd.getString("STOREDPAY_MONEY")), order_pd.getString("STORE_ID"), order_pd.getString("SERVICE_STAFF_ID"), null);
+			}
+			//2 代表储值卡余额支付    6代表储值卡返点支付
+			/*if (!"".equals(pd.getString("STOREDPAY_MONEY")) && !"0".equals(pd.getString("STOREDPAY_MONEY")) && pd.get("STOREDPAY_MONEY") != null) {
 				//减少该用户的储值卡金额，先扣除储值卡余额，再扣除返点余额,插入储值卡的明细
 				
 				//该次订单储值卡需要支付的金额
@@ -612,11 +573,11 @@ public class PayMedicinalController extends BaseController {
 		
 		
 		
-		/**
+		*//**
 		 * 关于用户储值卡的金额
 		 * 有n次订单，使用储值卡总金额为money,那么储值卡金额要减去money
 		 * 但是要插入n次订单支付方式和n次储值卡明细，每次的金额为money/n
-		 */
+		 *//*
 		if (!"".equals(pd.getString("STOREDPAY_MONEY")) && !"0".equals(pd.getString("STOREDPAY_MONEY")) && pd.get("STOREDPAY_MONEY") != null) {
 			
 			//用户用储值卡支付的钱
@@ -634,7 +595,7 @@ public class PayMedicinalController extends BaseController {
 				czkpd.put("REMAIN_POINTS", pointsmm);
 			}
 			customstoredService.editSubMoney(czkpd);
-		}
+		}*/
 		
 		
 		if (!"".equals(pd.getString("PRESTOREPAY_MONEY")) && !"0".equals(pd.getString("PRESTOREPAY_MONEY")) && pd.get("PRESTOREPAY_MONEY") != null) {
