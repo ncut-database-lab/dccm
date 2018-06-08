@@ -120,7 +120,9 @@ public class WeChatUserStoredCardService implements WeChatUserStoredCardManager 
                     } else {
                         weChatStoredDetailCustom.setMoney(weChatStoredDetailCustom.getMoney().add(prePayMoney));
                     }
-                    weChatStoredDetailCustom.setPoints(zero);
+                    if (weChatStoredDetailCustom.getPoints() == null) {
+                        weChatStoredDetailCustom.setPoints(zero);
+                    }
                     card.setRemainMoney(card.getRemainMoney().subtract(prePayMoney));
                 } else {
                     if (weChatStoredDetailCustom.getMoney() == null) {
