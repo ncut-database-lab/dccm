@@ -154,10 +154,11 @@
 								<tr>
 									<td style="width:150px;text-align: right;padding-top: 13px;">请选择优惠券</td>
 									<td>
+										<c:if test="${isSingleProject == 1}">
 										<div class="groupDiv">
 											<c:forEach items="${discountGroupPdList}" var="discountgroup">
 												<div>
-													<%-- <c:if test="${discountgroup.sum!=0}"> --%>
+													 <c:if test="${discountgroup.sum!=0}">
 													<div group="${discountgroup.discount_group_id}"
 														style="color:red;font-size:16px;cursor:pointer;">
 														<img src="${pageContext.request.contextPath}/static/images/libao.png"
@@ -205,10 +206,12 @@
 															</c:forEach>
 														</table>
 													</div>
-													<%-- </c:if> --%>
+													</c:if>
 												</div>
 											</c:forEach>
-										</div></td>
+										</div>
+										</c:if>
+									</td>
 								</tr>
 
 								<tr>

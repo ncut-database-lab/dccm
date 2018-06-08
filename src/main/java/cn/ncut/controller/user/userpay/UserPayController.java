@@ -167,6 +167,26 @@ public class UserPayController extends BaseController {
 		response.setContentType("text/xml;charset=UTF-8");
 		response.getWriter().write(s);
 	}
+	
+	// 根据医生信息异步出属于他的服务项目
+		@RequestMapping(value = "/refreshProjectCostBySId_membercallback")
+		public void refreshProjectCostBySId_membercallback(HttpServletResponse response)
+				throws Exception {
+
+			PageData pd = new PageData();
+			pd = this.getPageData();
+			//pd.put("PNAME", new String(pd.getString("PNAME").getBytes("ISO-8859-1"), "utf-8"));
+
+			// 得到当前的客服的门店编号
+			Session session = Jurisdiction.getSession();
+
+			// 在服务标准表中查询所属门店的当前选中医生的所有项目
+			List<PageData> pdlist = servicecostService.findServiceAndCostByStaff_id(pd);
+			String s = new ObjectMapper().writeValueAsString(pdlist);
+
+			response.setContentType("text/xml;charset=UTF-8");
+			response.getWriter().write(s);
+		}
 
 	// 根据服务项目生成服务价钱
 	@RequestMapping(value = "/refreshCostByProjectid")
@@ -317,6 +337,7 @@ public class UserPayController extends BaseController {
 
 		}
 
+		mv.addObject("isSingleProject", costMap.size());
 		mv.addObject("costIdAndNumJson", jsonArr.toString());
 		mv.addObject("doctor", doctor);
 		mv.addObject("costMap", costMap);

@@ -513,6 +513,135 @@ public class OrderService implements OrderManager {
 		}
 	}
 	
+	@Override
+	public void createOrderHuiDian(Map<String, Double> map, PageData pd) throws Exception{
+		
+		for (Map.Entry<String, Double> entry : map.entrySet()) {  
+			
+			String cost_id = entry.getKey().substring(0, entry.getKey().lastIndexOf("_")); 
+			Double singlemoney= entry.getValue();  
+			
+			PageData userpd = new PageData();
+			String uid = pd.getString("UID");
+			userpd = memberService.findUserStorededAndPrestoreByUid(Integer.parseInt(uid));
+			
+			PageData cost_pd = new PageData();
+			pd.put("SERVICECOST_ID", cost_id);
+			cost_pd = serviceCostService.findById(pd);
+			
+			//判断是否为0元订单
+			if(singlemoney!=0.0){//不是0元订单
+			//1.插入订单表
+			PageData order_pd = new PageData();
+			String orderId = "OD"+PrimaryKeyGenerator.generateKey();
+			order_pd.put("ORDER_ID", orderId);
+			order_pd.put("UID", pd.getString("UID"));
+			order_pd.put("STORE_ID",  pd.getString("STORE_ID"));//对应医生的门店编号
+			order_pd.put("SERVICECOST_ID", cost_id);
+			order_pd.put("STAFF_ID", cost_pd.getString("STAFF_ID"));
+			order_pd.put("SERVICE_STAFF_ID", pd.getString("SERVICE_STAFF_ID"));
+			order_pd.put("ORDER_MONEY", ((BigDecimal)cost_pd.get("PRICE")).toString()); //每一次应收,打过折没用优惠券的价格
+			order_pd.put("PAY_MONEY", singlemoney);        //减过优惠券的价格
+			order_pd.put("PROPORTION", (Double)pd.get("proportion"));        //用户最低折扣
+			order_pd.put("CREATE_TIME", DateUtil.getTime()); // 创建时间
+			order_pd.put("WECHAT_NAME", userpd.getString("name"));
+			order_pd.put("WECHAT_PHONE", userpd.getString("phone"));
+			order_pd.put("URL", "1");
+			if(0==(Double)pd.get("isSingleProject")){ //单个项目
+				order_pd.put("DISCOUNT_ID", pd.get("averageDiscountMoney")); // 存入该订单使用的优惠券金额
+			}else{ //多个项目
+				order_pd.put("DISCOUNT_ID", "0.00");
+			}
+			order_pd.put("REFUND", Double.parseDouble("0.00"));
+			order_pd.put("ORDER_STATUS", 0); // 未支付订单
+			order_pd.put("RECOMMEND_TIME", pd.get("serviceTime"));//预约时间
+			order_pd.put("REMARK", pd.getString("REMARK"));
+			
+			
+			this.save(order_pd);
+			
+		
+		
+											
+		}else{//是0元订单
+			//1.插入订单表
+			PageData order_pd = new PageData();
+			String orderId = "OD"+PrimaryKeyGenerator.generateKey();
+			order_pd.put("ORDER_ID", orderId);
+			order_pd.put("UID", pd.getString("UID"));
+			order_pd.put("STORE_ID",  pd.getString("STORE_ID"));//对应医生的门店编号
+			order_pd.put("SERVICECOST_ID", cost_id);
+			order_pd.put("STAFF_ID", cost_pd.getString("STAFF_ID"));
+			order_pd.put("SERVICE_STAFF_ID", pd.getString("SERVICE_STAFF_ID"));
+			order_pd.put("ORDER_MONEY", ((BigDecimal)cost_pd.get("PRICE")).toString()); //每一次应收,打过折没用优惠券的价格
+			order_pd.put("PAY_MONEY", 0.00);        //减过优惠券的价格
+			order_pd.put("PROPORTION", (Double)pd.get("proportion"));        //用户最低折扣
+			order_pd.put("CREATE_TIME", DateUtil.getTime()); // 创建时间
+			order_pd.put("WECHAT_NAME", userpd.getString("name"));
+			order_pd.put("WECHAT_PHONE", userpd.getString("phone"));
+			order_pd.put("URL", "1");
+			if(0==(Double)pd.get("isSingleProject")){ //单个项目
+				order_pd.put("DISCOUNT_ID", pd.get("averageDiscountMoney")); // 存入该订单使用的优惠券金额
+			}else{ //多个项目
+				order_pd.put("DISCOUNT_ID", "0.00");
+			}
+			order_pd.put("REFUND", Double.parseDouble("0.00"));
+			order_pd.put("ORDER_STATUS", 2); // 已支付订单
+			order_pd.put("RECOMMEND_TIME", pd.get("serviceTime"));//预约时间
+			order_pd.put("REMARK", pd.getString("REMARK"));
+			
+			
+			this.save(order_pd);
+			//插入订单明细
+			order_pd.put("CASHPAY_MONEY", 0);
+			insertPayDetail(order_pd,3,"CASHPAY_MONEY");
+			//插入预约表
+			//3.插入预约
+			PageData appoint_pd = new PageData();
+			appoint_pd.put("U_ID", pd.getString("UID"));
+			appoint_pd.put("CUSTOMAPPOINT_ID", UuidUtil.get32UUID());
+			appoint_pd.put("APPOINT_CODE", (char)(Math.random()*900000000)+10000000);
+			appoint_pd.put("SERVICE_STAFF_ID",pd.getString("SERVICE_STAFF_ID"));
+			
+				appoint_pd.put("APPOINT_TIME", pd.get("serviceTime"));
+				appoint_pd.put("EXPIRE_TIME", DateUtil.caculateGuoqiTime(pd.getString("serviceTime")));
+			
+			
+			appoint_pd.put("ORDER_ID", orderId);
+			customappointService.save(appoint_pd);	
+		
+		}
+		}
+		
+		//最后消掉本次所有订单中使用的用户的优惠券
+		if(0==(Double)pd.get("isSingleProject")){ //单个项目
+			if(pd.getString("DiscountJson")!=null ){
+				//消掉用户的优惠券
+				JSONArray data = JSONArray.fromObject(pd.getString("DiscountJson"));
+				for(int j=0; j<data.size(); j++){
+					
+					JSONObject obj =  (JSONObject) data.get(j);
+					
+				    String group_discount = obj.getString("discountid");
+				    String discount_id = group_discount.substring(group_discount.indexOf("-")+1);
+				    int number = Integer.parseInt(obj.getString("number"));
+				    
+				    //从tb_user_discount表里查出优惠券，置为已使用
+				    PageData dis_pd = new PageData();
+				    dis_pd.put("UID", pd.getString("UID"));
+				    dis_pd.put("DISCOUNT_ID", discount_id);
+				    
+				    List<PageData> discountList = discountService.findByUidAndDiscountId(dis_pd);
+				    for(int t=0; t<number; t++){
+				    	PageData already_dis_pd = discountList.get(t);
+				    	already_dis_pd.put("isUsed", 1);		
+				    	userdiscountService.edit(already_dis_pd);
+				    }
+				}
+			}
+		}
+	}
+	
 	public void insertPayDetail(PageData pd, int method, String methodText) throws Exception{
 		PageData ppdd = new PageData();
 		ppdd.put("ORDERMX_ID", UuidUtil.get32UUID());
