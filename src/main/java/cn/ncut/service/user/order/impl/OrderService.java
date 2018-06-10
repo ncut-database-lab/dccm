@@ -366,15 +366,13 @@ public class OrderService implements OrderManager {
 	@Override
 	public void createOrder(Map<String, List<Double>> map, PageData pd) throws Exception{
 		
+		PageData userpd = new PageData();
+		userpd = memberService.findById(pd);
+		
 		for (Map.Entry<String, List<Double>> entry : map.entrySet()) {  
-			
 			String cost_id = entry.getKey().substring(0, entry.getKey().lastIndexOf("_")); 
 			List<Double> list= entry.getValue();  
-			
-			PageData userpd = new PageData();
-			String uid = pd.getString("UID");
-			userpd = memberService.findUserStorededAndPrestoreByUid(Integer.parseInt(uid));
-			
+						
 			PageData cost_pd = new PageData();
 			pd.put("SERVICECOST_ID", cost_id);
 			cost_pd = serviceCostService.findById(pd);
@@ -476,9 +474,8 @@ public class OrderService implements OrderManager {
 			appoint_pd.put("APPOINT_CODE", (char)(Math.random()*900000000)+10000000);
 			appoint_pd.put("SERVICE_STAFF_ID",pd.getString("SERVICE_STAFF_ID"));
 			
-				appoint_pd.put("APPOINT_TIME", pd.get("serviceTime"));
-				appoint_pd.put("EXPIRE_TIME", DateUtil.caculateGuoqiTime(pd.getString("serviceTime")));
-			
+			appoint_pd.put("APPOINT_TIME", pd.get("serviceTime"));
+			appoint_pd.put("EXPIRE_TIME", DateUtil.caculateGuoqiTime(pd.getString("serviceTime")));
 			
 			appoint_pd.put("ORDER_ID", orderId);
 			customappointService.save(appoint_pd);									
@@ -516,14 +513,13 @@ public class OrderService implements OrderManager {
 	@Override
 	public void createOrderHuiDian(Map<String, Double> map, PageData pd) throws Exception{
 		
+		PageData userpd = new PageData();
+		userpd = memberService.findById(pd);
+		
 		for (Map.Entry<String, Double> entry : map.entrySet()) {  
 			
 			String cost_id = entry.getKey().substring(0, entry.getKey().lastIndexOf("_")); 
 			Double singlemoney= entry.getValue();  
-			
-			PageData userpd = new PageData();
-			String uid = pd.getString("UID");
-			userpd = memberService.findUserStorededAndPrestoreByUid(Integer.parseInt(uid));
 			
 			PageData cost_pd = new PageData();
 			pd.put("SERVICECOST_ID", cost_id);
