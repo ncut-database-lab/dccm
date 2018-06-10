@@ -171,7 +171,7 @@ public class StoredCategoryController extends BaseController {
 		//storeddetailService.save(pd);
 
 		pd.put("UID", userpd.get("uid")); // 用户id
-		PageData customstoredpd = customstoredService.findById(pd);// 查看之前是否有记录
+		//PageData customstoredpd = customstoredService.findById(pd);// 查看之前是否有记录
 		/*
 		if (customstoredpd != null) {
 			pd.put("REMAIN_MONEY", categorypd.get("STORED_MONEY")); // 余额
@@ -216,7 +216,7 @@ public class StoredCategoryController extends BaseController {
 		staffpointService.save(pp);*/
 		
 		try{
-		customstoredService.updateUserStoreded(pd, customstoredpd, categorypd);
+		customstoredService.updateUserStoreded(pd, categorypd);
 		str = "{\"success\":\"ok\"}";
 		
 		NCUTLOG.save(
