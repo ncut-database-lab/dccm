@@ -20,8 +20,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
-import sun.tools.tree.ThisExpression;
-
 import cn.ncut.controller.base.BaseController;
 import cn.ncut.entity.Page;
 import cn.ncut.entity.system.Staff;
@@ -32,8 +30,6 @@ import cn.ncut.service.finance.refund.RefundManager;
 import cn.ncut.service.system.ncutlog.NcutlogManager;
 import cn.ncut.service.system.staff.StaffManager;
 import cn.ncut.service.system.store.StoreManager;
-import cn.ncut.service.system.user.UserManager;
-import cn.ncut.service.system.user.impl.UserService;
 import cn.ncut.service.user.customstored.CustomStoredManager;
 import cn.ncut.service.user.member.impl.MemberService;
 import cn.ncut.service.user.order.OrderManager;

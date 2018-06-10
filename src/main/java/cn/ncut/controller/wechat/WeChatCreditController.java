@@ -9,8 +9,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
 
-import com.sun.tools.internal.ws.processor.model.Model;
-
 import cn.ncut.controller.base.BaseController;
 import cn.ncut.service.wechat.credit.WeChatCreditManager;
 import cn.ncut.util.PageData;

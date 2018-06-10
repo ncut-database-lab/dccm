@@ -9,8 +9,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.annotation.Resource;
-import javax.mail.Session;
-import javax.servlet.http.HttpSession;
 import cn.ncut.entity.system.Staff;
 import net.sf.json.JSONArray;
 
@@ -22,7 +20,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
-import sun.tools.tree.ThisExpression;
 import cn.ncut.controller.base.BaseController;
 import cn.ncut.entity.Page;
 import cn.ncut.util.AppUtil;
@@ -31,12 +28,10 @@ import cn.ncut.util.DateUtil;
 import cn.ncut.util.ObjectExcelView;
 import cn.ncut.util.PageData;
 import cn.ncut.util.Jurisdiction;
-import cn.ncut.util.Tools;
 import cn.ncut.service.finance.prestore.PreStoreManager;
 import cn.ncut.service.finance.refund_money.Refund_moneyManager;
 import cn.ncut.service.system.ncutlog.NcutlogManager;
 import cn.ncut.service.system.staff.StaffManager;
-import cn.ncut.service.system.user.UserManager;
 import cn.ncut.service.user.member.MemberManager;
 
 /**
