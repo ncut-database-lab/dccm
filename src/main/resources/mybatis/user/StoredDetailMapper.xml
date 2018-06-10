@@ -177,7 +177,7 @@
 	   LEFT OUTER JOIN tb_store e 
 		   on
 		 a.STORE_ID = e.STORE_ID		
-	   where a.STATUS=0 and a.TYPE in('0','1','3') 
+	   where a.STATUS=0 and a.TYPE in('0','1','3','4','5')
 	   <if test="pd.firstDate!=null and pd.firstDate !=''" >
 			and (a.CREATE_TIME &gt; #{pd.firstDate} or a.CREATE_TIME=#{pd.firstDate})
 		</if>
@@ -239,7 +239,7 @@
 	   LEFT OUTER JOIN tb_store e 
 		   on
 		 a.STORE_ID = e.STORE_ID		
-	   where a.STATUS=0 and a.TYPE in('0','1','3') 
+	   where a.STATUS=0 and a.TYPE in('0','1','3','4','5')
 	   <if test="firstDate!=null and firstDate !=''" >
 			and (a.CREATE_TIME &gt; #{firstDate} or a.CREATE_TIME=#{firstDate})
 		</if>
@@ -271,7 +271,7 @@
 		<if test="staffName != null and staffName != ''">
 			and a.STAFF_ID = #{staffName}
 		</if>
-		order by a.CREATE_TIME DESC
+		order by a.CREATE_TIME
 	</select>
 	
 	<!-- fh313596790qq(青苔) -->

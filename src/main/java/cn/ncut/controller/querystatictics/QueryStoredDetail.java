@@ -194,17 +194,12 @@ public class QueryStoredDetail extends BaseController{
 		titles.add("门店"); // 7
 		titles.add("客服"); // 8
 		titles.add("创建日期"); // 9
-		titles.add("金额"); // 10	
+		titles.add("储值"); // 10
 		titles.add("返点"); // 12
-		titles.add("微信支付");
-		titles.add("支付宝");
-		titles.add("银联");
-		titles.add("现金");
-		titles.add("状态");
-		titles.add("备注");
+		titles.add("余额消费");
+		titles.add("返点消费");
 		dataMap.put("titles", titles);
 		List<PageData> varOList = storeddetailService.selectstoredAll(pd);
-				//.selectstoredAll(pd);
 		List<PageData> varList = new ArrayList<PageData>();
 		for (int i = 0; i < varOList.size(); i++) {
 			PageData vpd = new PageData();
@@ -215,22 +210,19 @@ public class QueryStoredDetail extends BaseController{
 			vpd.put("var5", varOList.get(i).get("STAFF_NAME"));
 			vpd.put("var6", varOList.get(i).get("CREATE_TIME"));
 		    java.text.DecimalFormat   df   =new   java.text.DecimalFormat("#.00");
-		  //  df.format(varOList.get(i).get("MONEY"));
-			
-			vpd.put("var7", String.valueOf(varOList.get(i).get("MONEY"))); // 7
-			vpd.put("var8", String.valueOf(varOList.get(i).get("POINTS")));				
-			vpd.put("var9", String.valueOf(varOList.get(i).get("WECHATPAY_MONEY")));
-			vpd.put("var10", String.valueOf(varOList.get(i).get("ALIPAY_MONEY")));
-			vpd.put("var11", String.valueOf(varOList.get(i).get("BANKPAY_MONEY")));
-			vpd.put("var12", String.valueOf(varOList.get(i).get("CASHPAY_MONEY")));
-			
-			if((Integer)varOList.get(i).get("STATUS")==0){
-				vpd.put("var13","已完成");
+			String type = varOList.get(i).get("TYPE").toString();
+
+		    if(type.equals("0") || type.equals("1") || type.equals("3")){
+				vpd.put("var7", String.valueOf(varOList.get(i).get("MONEY"))); // 7
+				vpd.put("var8", String.valueOf(varOList.get(i).get("POINTS")));
+				vpd.put("var9", String.valueOf(0)); // 7
+				vpd.put("var10", String.valueOf(0));
 			}else{
-			   vpd.put("var13", "待支付"); 
+				vpd.put("var7", String.valueOf(0)); // 7
+				vpd.put("var8", String.valueOf(0));
+				vpd.put("var9", String.valueOf(varOList.get(i).get("MONEY"))); // 7
+				vpd.put("var10", String.valueOf(varOList.get(i).get("POINTS")));
 			}
-			vpd.put("var14", varOList.get(i).get("REMARK"));
-			
 			varList.add(vpd);
 		}
 		dataMap.put("varList", varList);
