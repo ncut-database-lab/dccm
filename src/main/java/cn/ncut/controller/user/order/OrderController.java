@@ -101,7 +101,7 @@ public class OrderController extends BaseController {
 	}
 	
 	/**删除
-	 * @param out
+	 * @param
 	 * @throws Exception
 	 */
 	@RequestMapping(value="/delete")
@@ -468,7 +468,7 @@ public class OrderController extends BaseController {
 			pddd.put("TYPE", 6);
 			pddd.put("POINTS",pd.get("refund_card_points"));
 			
-			if (Double.parseDouble(pd.getString("REMAIN_MONEY"))!=0&&Double.parseDouble(pd.getString("refund_card_money"))!=0) 
+			if (Double.parseDouble(pd.getString("refund_card_points"))!=0||(Double.parseDouble(pd.getString("REMAIN_MONEY"))!=0&&Double.parseDouble(pd.getString("refund_card_money"))!=0))
 			customstoredService.saveMx(pddd);
 			
 			
