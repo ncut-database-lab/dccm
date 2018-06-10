@@ -70,12 +70,6 @@ public class WeChatUserStoredCardService implements WeChatUserStoredCardManager 
         BigDecimal prePayMoney = new BigDecimal(money);
 
         // 有效的储值卡金额
-        
-        System.out.println(moneyOfCard.getRemainMoney());
-        System.out.println("*************************************************");
-        System.out.println(moneyOfCard.getRemainPoints());
-        System.out.println("*************************************************");
-        
         BigDecimal validMoney = moneyOfCard.getRemainMoney().add(moneyOfCard.getRemainPoints());
 
         if (validMoney.compareTo(prePayMoney) < 0) {
