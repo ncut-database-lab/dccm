@@ -192,12 +192,11 @@
 		from 
 			tab_user a LEFT OUTER JOIN tb_usercategory b 
 		ON a.usercategory_id = b.USERCATEGORY_ID 
-		LEFT OUTER JOIN tb_custom_stored c on a.uid=c.UID
+		LEFT OUTER JOIN tb_custom_stored c on a.uid=c.UID and c.status = 0
 		LEFT OUTER JOIN tb_prestore d on a.uid=d.UID 
 		where 
 			a.uid=#{uid}
-		and
-		c.status = 0
+		
 			group by uid
 	
 	</select>
