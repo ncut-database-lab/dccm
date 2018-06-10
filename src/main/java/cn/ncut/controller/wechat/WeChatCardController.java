@@ -161,6 +161,21 @@ public class WeChatCardController extends BaseController {
 				// 插入储值记录
 				weChatCardService.insertStoredDetail(pd);
 				log.debug("插入储值记录" + pd.toString());
+
+				//插入待充钱的账户
+				WeChatStored weChatStored = new WeChatStored();
+				weChatStored.setuId(uId);
+				weChatStored.setName(weChatUser.getName());
+				weChatStored.setPhone(weChatUser.getPhone());
+				weChatStored.setRemainMoney(bigDecimal);
+				weChatStored.setRemainPoints((BigDecimal)cardType.get("returnPoints"));
+				//2代表待充钱
+				weChatStored.setStatus(2);
+				weChatStored.setPassWord(MD5Util.MD5Encode("123456",
+						"utf-8"));
+				weChatCardService.createCard(weChatStored);
+				logger.debug("创建一个储值账户" + weChatStored);
+
 				String openId = weChatUser.getOpenId();
 				String spbillCreateIp = NetworkUtil.getIpAddress(request);
 				String body = "大诚中医-储值卡充值";// 商品描述
