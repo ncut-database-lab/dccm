@@ -2,12 +2,16 @@ package cn.ncut.controller.user.membercallback;
 
 import java.io.PrintWriter;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import javax.annotation.Resource;
@@ -193,8 +197,6 @@ public class MemberCallBackController extends BaseController {
 		
 		pd = this.getPageData();
 		
-		System.out.println(pd);
-		
 		//查询 下订单的用户信息,包括储值卡，用户余额
 		PageData userpd = memberService.findUserStorededAndPrestoreByUid(Integer.parseInt(pd.getString("UID")));
 		
@@ -205,22 +207,39 @@ public class MemberCallBackController extends BaseController {
 		//用户最低折扣
 		double lowProportion = person_proportion < category_proportion ? person_proportion : category_proportion;
 		
-		//查询该用户选择的服务项目收费信息
-		PageData costPd = servicecostService.findById(pd);
-		
-		
-		
-		//订单中单次服务项目的价格
-		BigDecimal singleprice = (BigDecimal)costPd.get("PRICE");
-		
-		//订单次数
-		BigDecimal ordernum = new BigDecimal(pd.getString("TIMES"));
-		
-		//订单打折前的价格，即单次服务项目的价格*次数
-		BigDecimal sumOrderMoney = singleprice.multiply(ordernum);
-		
-		//订单打折后的价格，即单次服务项目的价格*次数*折扣
-		BigDecimal zhekouPrice = sumOrderMoney.multiply(new BigDecimal(lowProportion)).setScale(2,BigDecimal.ROUND_HALF_UP);
+		String doctor = "";
+		// 分离项目和次数
+		BigDecimal sumOrderMoney = new BigDecimal("0");
+		Map costMap = new LinkedHashMap();
+		JSONArray jsonArr = JSONArray.fromObject(pd.getString("projectcost_id"));
+		Iterator<Object> it = jsonArr.iterator();
+		while (it.hasNext()) {
+			JSONObject obj = (JSONObject) it.next();
+			// 算出总价格
+			PageData cost_pd = new PageData();
+			cost_pd.put("SERVICECOST_ID", obj.get("cost_id"));
+
+			// 查询该用户选择的服务项目收费信息
+			PageData costPd = servicecostService.findById(cost_pd);
+
+			// 订单中单次服务项目的价格
+			BigDecimal singleprice = (BigDecimal) costPd.get("PRICE");
+
+			doctor = costPd.getString("STAFF_NAME");
+			costMap.put(costPd.getString("PNAME") + " / " + singleprice, obj.get("cishu"));
+
+			// 打折前价格累加
+			BigDecimal OrderMoney = singleprice.multiply(
+					new BigDecimal(obj.get("cishu").toString())).setScale(2,
+					BigDecimal.ROUND_HALF_UP);
+
+			sumOrderMoney = sumOrderMoney.add(OrderMoney);
+		}
+
+		// 订单打折后的价格，即单次服务项目的价格*次数*折扣
+		BigDecimal zhekouPrice = sumOrderMoney.multiply(
+				new BigDecimal(lowProportion)).setScale(2,
+				BigDecimal.ROUND_HALF_UP);
 		
 		//查询该用户有什么优惠券组合
 		List<UserDiscountGroup> discountGroupPdList = discountService.queryDiscountGroupByUid(Integer.parseInt(pd.getString("UID")));
@@ -233,22 +252,18 @@ public class MemberCallBackController extends BaseController {
 			for(UserDiscount userdiscount : discountPdList)//遍历它的每一个优惠券
 			{
 				sum = sum + userdiscount.getCount();
-					
 				}
 			group.setSum(sum);
-			group.setUserDiscounts(discountPdList);
-			
-			
-			System.out.println(group);
-			
+			group.setUserDiscounts(discountPdList);			
 		}
 		
-		
-		
-		mv.addObject("costPd", costPd);
-		mv.addObject("userpd", userpd);
-		mv.addObject("pd", pd);
+		mv.addObject("isSingleProject", costMap.size());
+		mv.addObject("costIdAndNumJson", jsonArr.toString());
+		mv.addObject("doctor", doctor);
+		mv.addObject("costMap", costMap);
 		mv.addObject("lowProportion",lowProportion);
+		mv.addObject("pd", pd);
+		mv.addObject("userpd", userpd);
 		mv.addObject("sumOrderMoney",sumOrderMoney);
 		mv.addObject("zhekouPrice",zhekouPrice);
 		mv.addObject("discountGroupPdList", discountGroupPdList);
@@ -291,226 +306,119 @@ public class MemberCallBackController extends BaseController {
 	 * 
 	 * @throws Exception
 	 */
+	@ResponseBody
 	@RequestMapping(value = "/createOrder")
-	public void createOrder(HttpSession session,
+	public Map<String,String> createOrder(HttpSession session,
 			HttpServletResponse response) throws Exception {
+		
+		Map<String, String> returnMap = new HashMap<>();
+		Map<String, List<Double>> map = new LinkedHashMap<>();
+		DecimalFormat df = new DecimalFormat("#0.00");   
+
 		PageData pd = new PageData();
 		pd = this.getPageData();
-		DecimalFormat df  = new DecimalFormat("######0.00");   
-		//得到当前用户的信息
-		PageData userpd = new PageData();
-		userpd.put("UID", pd.getString("UID"));
-		userpd = memberService.findById(userpd);
-		
-		//得到该项目单次价钱
-		PageData costpd = new PageData();
-		costpd.put("SERVICECOST_ID", pd.get("SERVICECOST_ID"));
-		costpd = servicecostService.findById(costpd);
-				
-		/*// 把servicetime转换为日期
-				String serviceTime = convertDate2(pd.getString("selectedDate"),pd.getString("servicetime"));*/
-		//订单次数	
-				int s = Integer.parseInt(pd.getString("ordeNum"));
-				
-		//得到预约时间
-		String recommend_time = (String)pd.get("servicetime");
-		////////////////////////////////////////优惠券相关
 
-		/**
-		 * 获取用户的优惠券信息，分两种情况创建订单：
-		 * 1、没有使用优惠券，只计算折扣价
-		 * 2、用了优惠券，订单中插入优惠券金额，并且将用的优惠券置为已使用
-		 */
-		//得到用户使用的优惠券信息
-		
-		if(Double.parseDouble(pd.getString("DiscountMoney"))!=0 && pd.get("DiscountMoney")!=null && !"".equals(pd.getString("DiscountMoney"))){
-			String discount  = pd.getString("DiscountMoney");
-			//计算单笔订单支付金额
-			BigDecimal singleprice = (BigDecimal)costpd.get("PRICE");//单笔应收
-			BigDecimal zhekousinglePrice = singleprice.multiply(new BigDecimal(pd.getString("PROPORTION")));//单笔打折
-			BigDecimal discountAmount = new BigDecimal(pd.getString("DiscountMoney"));
-			BigDecimal discountsinglePrice = zhekousinglePrice.subtract(discountAmount.divide(new BigDecimal(s),2)).setScale(2); 
-			pd.put("PAY_MONEY", discountsinglePrice); // 支付金额
-	pd.put("DISCOUNT_ID", discountAmount.divide(new BigDecimal(s),2));//单笔优惠金额	
-	//消掉用户的优惠券
-	JSONArray data = JSONArray.fromObject(pd.getString("DiscountJson"));
-	for(int j=0; j<data.size(); j++){
-		
-		JSONObject obj =  (JSONObject) data.get(j);
-		
-	    String group_discount = obj.getString("discountid");
-	    String discount_id = group_discount.substring(group_discount.indexOf("-")+1);
-	    int number = Integer.parseInt(obj.getString("number"));
-	    
-	    //从tb_user_discount表里查出优惠券，置为已使用
-	    PageData dis_pd = new PageData();
-	    dis_pd.put("UID", pd.getString("UID"));
-	    dis_pd.put("DISCOUNT_ID", discount_id);
-	    
-	    List<PageData> discountList = discountService.findByUidAndDiscountId(dis_pd);
-	    for(int t=0; t<number; t++){
-	    	PageData already_dis_pd = discountList.get(t);
-	    	already_dis_pd.put("isUsed", 1);		
-	    	userdiscountService.edit(already_dis_pd);
-	    	
-	    }
-	   /* ////查询该用户有什么优惠券组合
-	    Integer sum = 0;//定义该组合中所有的未使用优惠券个数
-		List<UserDiscountGroup> discountGroupPdList = discountService.queryDiscountGroupByUid(Integer.parseInt(pd.getString("UID")));//得到用户的优惠券组
-		//遍历用户的优惠券组合，往组合里添加该用户拥有的属于组合的优惠券
-		for(UserDiscountGroup group : discountGroupPdList){
+		// 得到当前的客服的门店编号
+		Staff staff = ((Staff) session.getAttribute(Const.SESSION_USER));
+
+		// 用户最低折扣
+		double lowProportion = Double.parseDouble(pd.getString("proportion"));
+		double needMoney = 0.0;
+		double isSingleProject = 0;
+		JSONArray jsonArr;
+
+		// 得到选择的项目和次数，并拼成一个map
+		String costIdAndNum = pd.getString("costIdAndNum");
+
+		Map<String, Double> serviceMap = new LinkedHashMap();
+		try {
+			jsonArr = JSONArray.fromObject(costIdAndNum);
+
+			// 判断是单个项目还是多个项目
+			double averageSingleMoney = 0.0;
+			if (jsonArr.size() == 1){
+				needMoney = Double.parseDouble(pd.getString("needMoney"));
+				JSONObject obj = (JSONObject) jsonArr.get(0);
+				int n = Integer.parseInt(obj.getString("cishu"));
+				averageSingleMoney = Double.parseDouble(df.format(needMoney/n));
+			}else { //多个项目
+				isSingleProject = 1; 
+			}
 			
-			List<UserDiscount> discountPdList = discountService.queryDiscountByUidAndGroupid(group);//查询这个组合有什么优惠券
-			for(UserDiscount userdiscount : discountPdList)//遍历它的每一个优惠券
-			{
-				sum = sum + userdiscount.getCount();
-					
+			Iterator<Object> it = jsonArr.iterator();
+			while (it.hasNext()) {
+				JSONObject obj = (JSONObject) it.next();
+				for (int i = 0; i < Integer.parseInt(obj.getString("cishu")); i++) {
+					PageData cost_pd = new PageData();
+					cost_pd.put("SERVICECOST_ID", obj.get("cost_id"));
+					cost_pd = servicecostService.findById(cost_pd);
+					BigDecimal singleMoney = (BigDecimal)cost_pd.get("PRICE");
+					double zhekouSingleMoney = singleMoney.doubleValue() * lowProportion;
+					if(isSingleProject == 1)
+						serviceMap.put(obj.getString("cost_id") + "_" + (i+1), zhekouSingleMoney);
+					else
+						serviceMap.put(obj.getString("cost_id") + "_" + (i+1), averageSingleMoney);
 				}
-			if(sum==0){//该优惠券组中没有未使用的优惠券
-				//删除该优惠券组
-				String groupid =  group.getDiscount_group_id();
-				userdiscountService.deleteDiscounGroupByid(groupid);
-				
 			}
-			}*/
-			
-			
-	
-		}
-	}else{//没有使用优惠券
-			BigDecimal singleprice = (BigDecimal)costpd.get("PRICE");//单笔应收
-			BigDecimal zhekousinglePrice = singleprice.multiply(new BigDecimal(pd.getString("PROPORTION"))).setScale(2);//单笔打折
-			//discount_id设置为0
-			pd.put("DISCOUNT_ID", "0.00");//单笔优惠金额
-			//pay_money设置为折扣价
-			pd.put("PAY_MONEY", zhekousinglePrice);
-			
-			
+		} catch (Exception e) {
+			e.printStackTrace();
+			returnMap.put("msg", "参数传递错误！");
+			returnMap.put("code", "500");
+			return returnMap;
 		}
 		
-		String orderId = "OD"+PrimaryKeyGenerator.generateKey();
-		pd.put("ORDER_ID", orderId); // 主键
-		pd.put("WECHAT_NAME", pd.get("NAME")); // 客户传的姓名
-		pd.put("WECHAT_PHONE", pd.get("PHONE")); // 客户传的手机号
-	
-		pd.put("ORDER_MONEY", costpd.get("PRICE"));// 单笔订单金额
-		pd.put("STORE_ID", staffService.queryStoreBySID(pd.getString("STAFF_ID")));// 门店编号
-		pd.put("SERVICE_STAFF_ID", ((Staff) session
-				.getAttribute(Const.SESSION_USER)).getSTAFF_ID());// 客服编号
-		pd.put("CREATE_TIME", DateUtil.getTime()); // 创建时间
-		
-		pd.put("RECOMMEND_TIME", recommend_time);//预约时间
-		
-	/*	pd.put("EXPIRE_TIME", TimeAdjust.addDateMinut(DateUtil.getTime(), 30, "YYYY-MM-DD hh:mm:ss"));//过期时间
-		long curren = System.currentTimeMillis();
-		curren += 30 * 60 * 1000;
-		Date da = new Date(curren);
-		SimpleDateFormat dateFormat = new SimpleDateFormat(
-				"yyyy-MM-dd HH:mm:ss");
-		// System.out.println(dateFormat.format(da));
-*/		pd.put("EXPIRE_TIME", DateUtil.caculateGuoqiTime(recommend_time)); // 过期时间
-		pd.put("REMARK", pd.getString("REMARK")); // 备注
-		pd.put("PROPORTION",  pd.getString("PROPORTION")); // 订单折扣
-		double d1 = 0.00;  
-		pd.put("REFUND", df.format(d1)); // 退款
-		pd.put("URL", 0); // 微信端自助下单
-if(pd.get("PAY_MONEY").toString().equals("0.00"))
-{
-	pd.put("ORDER_STATUS", 2);// 订单状态已支付
-	orderService.save(pd);
-	//写预约表
-	 pd.put("CUSTOMAPPOINT_ID", this.get32UUID()); //预约表主键
-	 pd.put("U_ID",pd.get("UID")); 
-	 if(!pd.get("RECOMMEND_TIME").equals("")){
-	  pd.put("APPOINT_TIME", pd.get("RECOMMEND_TIME"));//预约时间 
-	  String appoint_time = pd.getString("APPOINT_TIME");//预约时间 
-	
-	  pd.put("EXPIRE_TIME",  DateUtil.caculateGuoqiTime(appoint_time));//过期时间 
-	  pd.put("SERVICE_STAFF_ID", "微信端自助下单");
-	  pd.put("APPOINT_CODE", (char)(Math.random()*900000000)+10000000);
-	  //生成验证码 
-	  customappointService.save(pd);
-	//写支付明细
-	  PageData ppdd = new PageData();
-		ppdd.put("ORDERMX_ID", this.get32UUID());
-		ppdd.put("UID", pd.getString("UID"));
-		ppdd.put("ORDER_ID", pd.getString("ORDER_ID"));
-		ppdd.put("ORDER_MONEY", pd.get("ORDER_MONEY"));
-		ppdd.put("PAY_MONEY", pd.get("PAY_MONEY"));
-		ppdd.put("PAY_METHOD", 3);
-		ppdd.put("PAY_TIME", pd.getString("CREATE_TIME"));
-		
-		
-		ordermxService.save(ppdd); 
-	
-}
-	
-}
-else{
-	pd.put("ORDER_STATUS", 0);// 订单状态未支付
-	orderService.save(pd);
-}
-		
-		
-		for (int i = 1; i < s; i++) {
-			pd.put("SERVICE_STAFF_ID", ((Staff) session
-				.getAttribute(Const.SESSION_USER)).getSTAFF_ID());//客服编号
-			pd.put("RECOMMEND_TIME", "");// 不写推荐时间
-			pd.put("CREATE_TIME", DateUtil.getTime()); // 创建时间
-			pd.put("EXPIRE_TIME", "");//不写过期时间
-			
-			String neworderid = "OD"+PrimaryKeyGenerator.generateKey();
-			pd.put("ORDER_ID", neworderid); // 主键
-
-			orderService.save(pd);
-			if(pd.get("PAY_MONEY").toString().equals("0.00"))//0元订单还要写预约表
-			{
-				
-				  pd.put("CUSTOMAPPOINT_ID", this.get32UUID()); //预约表主键
-				  pd.put("APPOINT_TIME", "");//不写预约时间
-				  pd.put("EXPIRE_TIME", "");//不写过期时间 
-				  pd.put("APPOINT_CODE",(char)(Math.random()*900000000)+10000000); //生成验证码
-				  pd.put("SERVICE_STAFF_ID", "微信端自助下单");
-				  customappointService.save(pd);
-				//写支付明细
-				  PageData ppdd = new PageData();
-					ppdd.put("ORDERMX_ID", this.get32UUID());
-					ppdd.put("UID", pd.getString("UID"));
-					ppdd.put("ORDER_ID", pd.getString("ORDER_ID"));
-					ppdd.put("ORDER_MONEY", pd.get("ORDER_MONEY"));
-					ppdd.put("PAY_MONEY", pd.get("PAY_MONEY"));
-					ppdd.put("PAY_METHOD", 3);
-					ppdd.put("PAY_TIME", pd.getString("CREATE_TIME"));
+		JSONObject obj = (JSONObject) jsonArr.get(0);
+		int n = Integer.parseInt(obj.getString("cishu"));
 					
-					ordermxService.save(ppdd); 
-				 
-			
-			}
-			
-}
-		
-		
-		// /以下修改回电表状态
-		PageData staffPd = staffService.findById(pd);
-		PageData serviceCostPd = servicecostService.findById(pd);
+		PageData paramPd = new PageData();
+		paramPd.put("UID", pd.getString("UID"));
+		paramPd.put("STORE_ID", staff.getSTORE_ID());
+		paramPd.put("REMARK", pd.getString("REMARK"));
+		paramPd.put("SERVICE_STAFF_ID", staff.getSTAFF_ID());
+		paramPd.put("proportion", lowProportion);
+		paramPd.put("isSingleProject", isSingleProject);
+		paramPd.put("serviceTime", pd.getString("servicetime"));
 
-		NCUTLOG.save(Jurisdiction.getUsername(),
-				("新建微信端客户订单:用户名：" + (pd.getString("NAME") != null ? pd
-						.getString("NAME") : pd.getString("WECHAT_NAME")) + " ，手机号 "
-						+ (pd.getString("WECHAT_PHONE") == null ? pd
-						.getString("PHONE") : pd.getString("WECHAT_PHONE"))
-						+ "，并预约了" + staffPd.getString("STAFF_NAME") + "医生在"
-						+ recommend_time + "的"
-						+ serviceCostPd.getString("PNAME")+"项目"), this
-						.getRequest().getRemoteAddr());
+		if (isSingleProject == 0) {
+			if (Double.parseDouble(pd.getString("DiscountMoney")) != 0
+					&& pd.get("DiscountMoney") != null
+					&& !"".equals(pd.getString("DiscountMoney"))) {
+				BigDecimal DiscountMoney = new BigDecimal(
+						pd.getString("DiscountMoney"));
+				BigDecimal averageDiscountMoney = DiscountMoney.divide(
+						new BigDecimal(n), 2, RoundingMode.HALF_UP);
+				paramPd.put("averageDiscountMoney", averageDiscountMoney);
+				paramPd.put("DiscountJson", pd.getString("DiscountJson"));
+			}		
+		}
+		// 事务，进行数据库操作
+		try {
+			orderService.createOrderHuiDian(serviceMap, paramPd);
+			
+			membercallbackService.updatestatus(pd);
+			
+			/*// /以下修改回电表状态
+			PageData staffPd = staffService.findById(pd);
+			PageData serviceCostPd = servicecostService.findById(pd);
 
-		membercallbackService.updatestatus(pd);
-		
-		String flag="ok";
-		String responseJson = "{\"success\":\"" + flag + "\"}";
-		response.setCharacterEncoding("UTF-8");
-		response.setContentType("application/json");
-		response.getWriter().write(responseJson);
+			NCUTLOG.save(Jurisdiction.getUsername(),
+					("新建微信端客户订单:用户名：" + (pd.getString("NAME") != null ? pd
+							.getString("NAME") : pd.getString("WECHAT_NAME")) + " ，手机号 "
+							+ (pd.getString("WECHAT_PHONE") == null ? pd
+							.getString("PHONE") : pd.getString("WECHAT_PHONE"))
+							+ "，并预约了" + staffPd.getString("STAFF_NAME") + "医生"
+							+ "的"
+							+ serviceCostPd.getString("PNAME")+"项目"), this
+							.getRequest().getRemoteAddr());*/			
+		} catch (Exception e) {
+			e.printStackTrace();
+			returnMap.put("msg", "订单创建失败！");
+			returnMap.put("code", "500");
+			return returnMap;
+		}
+		returnMap.put("msg", "操作成功！");
+		returnMap.put("code", "200");
+		return returnMap;
 	}
 
 	/**

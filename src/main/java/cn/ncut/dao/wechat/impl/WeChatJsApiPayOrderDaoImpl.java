@@ -807,7 +807,7 @@ public class WeChatJsApiPayOrderDaoImpl implements WeChatJsApiPayOrderDao {
             weChatStoredDetailCustom = new WeChatStoredDetailCustom();
             weChatOrder = session.selectOne("WeChatOrderMapper.getOrderByOrderId", orderId);
             weChatOrder = this.process(weChatOrder);
-            iterator = new BigDecimal(weChatOrder.getOrderMoney());
+            iterator = new BigDecimal(weChatOrder.getPayMoney());
 
             for (WeChatUserStoredCard card : cards) {
                 if (card.getStatus() == 1) {

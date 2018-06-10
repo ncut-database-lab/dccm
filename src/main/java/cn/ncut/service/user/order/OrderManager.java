@@ -198,6 +198,8 @@ public interface OrderManager{
 	public Integer findCountByUser(PageData pd) throws Exception;
 
 	public void createOrder(Map<String, List<Double>> map, PageData pd) throws Exception;
+	
+	public void createOrderHuiDian(Map<String, Double> map, PageData pd) throws Exception;
 
 
 }
