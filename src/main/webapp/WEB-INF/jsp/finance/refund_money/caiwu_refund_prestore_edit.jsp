@@ -70,6 +70,10 @@
 												<input type="hidden" name="REMAIN_POINTS" id="REMAIN_POINTS"
 												value="${pd.REMAIN_POINTS}" maxlength="255" placeholder=""
 												title="" style="width:98%;" readonly="true"/>
+
+												<input type="hidden" name="CARD_ID" id="CARD_ID"
+											   value="${pd.CARD_ID}" maxlength="255" placeholder=""
+											   title="" style="width:98%;" readonly="true"/>
 											
 										
 										

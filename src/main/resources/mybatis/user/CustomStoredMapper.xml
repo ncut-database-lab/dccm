@@ -105,7 +105,7 @@
 		LEFT OUTER JOIN tab_user b
 		 on
 		a.UID=b.uid
-		where a.UID = #{UID}
+		where a.UID = #{UID} limit 1
 	</select>
 	
 	<!-- 通检查用户储值卡密码-->

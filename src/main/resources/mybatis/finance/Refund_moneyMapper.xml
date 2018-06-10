@@ -78,6 +78,8 @@
 		where a.uid = b.UID
 		AND
 		a.uid = #{REFUND_MONEY_ID}
+		AND
+		b.CARD_ID = #{CARD_ID}
 	</select>
 	
 	<!-- 通过ID获取数据 -->
@@ -173,7 +175,8 @@
 		a.phone,		
 		a.uid,
 		b.REMAIN_MONEY,
-		b.REMAIN_POINTS
+		b.REMAIN_POINTS,
+		b.CARD_ID
 		from 
 		tab_user a,
 		tb_custom_stored b
@@ -344,7 +347,7 @@
 			REMAIN_POINTS = 0.0
 			
 		where 
-			UID = #{UID}
+			CARD_ID = #{CARD_ID}
 	</update>
 	
 	<!-- 删除储值卡明细表-->

@@ -281,6 +281,7 @@ public class Refund_moneyController extends BaseController {
 		tb_order_insert.put("WECHAT_PHONE", pd.getString("phone"));
 		tb_order_insert.put("DISCOUNT_ID", 0);
 		tb_order_insert.put("PROPORTION", 1.0);
+		tb_order_insert.put("CARD_ID",pd.get("CARD_ID"));
 
 		// 3、删除储值卡
 		// 4、插入储值卡明细
@@ -451,6 +452,9 @@ public class Refund_moneyController extends BaseController {
 		ModelAndView mv = this.getModelAndView();
 		PageData pd = new PageData();
 		pd = this.getPageData();
+		pd.put("CARD_ID",(pd.get("REFUND_MONEY_ID").toString().split("_"))[1]);
+		pd.put("REFUND_MONEY_ID",(pd.get("REFUND_MONEY_ID").toString().split("_"))[0]);
+		
 		pd = refund_moneyService.findById(pd); // 根据ID读取
 		pd.put("TIME", DateUtil.getTime());
 		pd.put("STAFF_NAME", Jurisdiction.getUsername());
@@ -512,10 +516,17 @@ public class Refund_moneyController extends BaseController {
 		ModelAndView mv = this.getModelAndView();
 		PageData pd = new PageData();
 		pd = this.getPageData();
+		PageData pdd = new PageData();
+		pd.put("CARD_ID",(pd.get("REFUND_MONEY_ID").toString().split("_"))[1]);
+		pd.put("REFUND_MONEY_ID",(pd.get("REFUND_MONEY_ID").toString().split("_"))[0]);
+		pdd.put("CARD_ID",pd.get("CARD_ID"));
+		pdd.put("REFUND_MONEY_ID",pd.get("REFUND_MONEY_ID"));
 		pd = refund_moneyService.findById(pd); // 根据ID读取
 		pd.put("TIME", DateUtil.getTime());
 		pd.put("STAFF_NAME", Jurisdiction.getUsername());
 		pd.put("shouxufei", 5.00);
+		pd.put("CARD_ID",pdd.get("CARD_ID"));
+		pd.put("REFUND_MONEY_ID",pdd.get("REFUND_MONEY_ID"));
 		mv.setViewName("finance/refund_money/caiwu_refund_prestore_edit");
 		mv.addObject("msg", "caiwueditPrestore");
 		mv.addObject("pd", pd);
