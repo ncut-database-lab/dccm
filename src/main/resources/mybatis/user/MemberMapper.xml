@@ -196,6 +196,8 @@
 		LEFT OUTER JOIN tb_prestore d on a.uid=d.UID 
 		where 
 			a.uid=#{uid}
+		and
+		c.status = 0
 			group by uid
 	
 	</select>
@@ -408,6 +410,7 @@
 		LEFT JOIN tb_custom_stored c on a.uid =c.uid 
 		LEFT JOIN tb_usercategory d on a.usercategory_id=d.USERCATEGORY_ID
 		where 1=1
+		and c.status = 0
 		<if test="pd.keywords!= null and pd.keywords != ''"><!-- 关键词检索 -->
 			and
 				(
