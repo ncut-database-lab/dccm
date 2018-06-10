@@ -407,10 +407,10 @@
 		a.proportion,		
 		a.uid,b.SUM_MONEY,sum(c.remain_money) as remain_money,sum(c.remain_points) as remain_points,d.CATEGORY_NAME,d.PROPORTION as category_porportion
 		from tab_user a LEFT JOIN tb_prestore b on a.uid = b.UID 
-		LEFT JOIN tb_custom_stored c on a.uid =c.uid 
+		LEFT JOIN tb_custom_stored c on a.uid =c.uid and c.status = 0
 		LEFT JOIN tb_usercategory d on a.usercategory_id=d.USERCATEGORY_ID
 		where 1=1
-		and c.status = 0
+		<!-- and c.status = 0 -->
 		<if test="pd.keywords!= null and pd.keywords != ''"><!-- 关键词检索 -->
 			and
 				(
