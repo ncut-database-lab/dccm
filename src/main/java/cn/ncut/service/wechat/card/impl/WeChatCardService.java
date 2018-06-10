@@ -199,13 +199,16 @@ public class WeChatCardService implements WeChatCardManager {
 				Integer storedDetailuId = storedDetail.getuId();
 				logger.debug("根据储值订单号查询uid" + storedDetailuId);
 				pd.put("uId", storedDetailuId);
+
 				// 根据uId查询账户
+				/*
 				WeChatStored weChatStored = (WeChatStored) session.selectOne("WeChatCardMapper.selectStoredByuId", storedDetailuId);
 				logger.debug("根据uid:"+storedDetailuId+"查询账户" + weChatStored);
 				if (null == weChatStored) {
 					WeChatUser weChatUser = (WeChatUser)session.selectOne("WeChatUserMapper.getWeChatUserByuId", storedDetailuId);
 					if (null != weChatUser) {
-						weChatStored = new WeChatStored();
+						//更新待充钱账户为正常
+						WeChatStored weChatStored = new WeChatStored();
 						weChatStored.setuId(storedDetailuId);
 						weChatStored.setName(weChatUser.getName());
 						weChatStored.setPhone(weChatUser.getPhone());
@@ -218,12 +221,13 @@ public class WeChatCardService implements WeChatCardManager {
 						logger.debug("创建一个储值账户" + weChatStored);
 					}
 				}
+			*/
 				// 更新账户通过储值订单号
 				logger.debug("start-将储值明细中对应的订单号：--" + out_trade_no
-						+ "---中的钱存到账户:---" + storedDetailuId);
+						+ "---中的钱更新到账户:---" + storedDetailuId);
 				session.update("WeChatCardMapper.updateStoredByDetailOutTradeNo", pd);
 				logger.debug("end-将储值明细中对应的订单号：--" + out_trade_no
-						+ "---中的钱存到账户:---" + storedDetailuId);
+						+ "---中的钱更新到账户:---" + storedDetailuId);
 			}
 		}
 		session.flushStatements();

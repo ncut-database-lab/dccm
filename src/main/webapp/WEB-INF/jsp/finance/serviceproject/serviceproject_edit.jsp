@@ -192,7 +192,8 @@
 	        error : function(data) {
 	            alert("加载分类树出错2");
 	        }
-	    }); 
+	    });
+
 		});
 		
 		function onTreeClick(e, treeId, treeNode) {
