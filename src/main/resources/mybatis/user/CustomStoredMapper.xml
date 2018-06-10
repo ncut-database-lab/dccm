@@ -56,6 +56,8 @@
 		UID = #{UID}
 		where 
 		UID = #{UID}
+		AND
+		CARD_ID = #{CARD_ID}
 	</update>
 	
 	<!-- 自己写的修改 充值时用 -->
@@ -278,4 +280,13 @@
 		values(#{STOREDDETAIL_ID},#{UID},#{STORE_ID},#{STAFF_ID},#{CREATE_TIME},#{MONEY},#{TYPE},#{POINTS}) 
 	
 	</insert>
+
+	<update id="updateStatusByCardId" parameterType="pd">
+		update
+		<include refid="tableName"></include>
+		set
+			STATUS = 0
+		where
+			CARD_ID = #{CARD_ID}
+	</update>
 </mapper>

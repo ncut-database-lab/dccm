@@ -126,5 +126,6 @@ public interface CustomStoredManager{
 	
 	public PageData findStoredByUidGroupByUid(int uid)throws Exception;
 	
+	void updateStatusByCardId(PageData pd)throws Exception;
 }
 

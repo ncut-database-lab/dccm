@@ -439,14 +439,20 @@ public class OrderController extends BaseController {
 			
 			//2、向储值卡中返钱返点
 			PageData customstoredpd = customstoredService.findById(pd);// 查看之前是否有记录
+			
+			customstoredService.updateStatusByCardId(customstoredpd);
+			
+			
 			if (customstoredpd != null) {
 				pd.put("REMAIN_MONEY", pd.get("refund_card_money")); // 余额
 				pd.put("REMAIN_POINTS", pd.get("refund_card_points"));
+				pd.put("CARD_ID",customstoredpd.get("CARD_ID"));
 				customstoredService.edit(pd);
 
 			} else {
 				pd.put("REMAIN_MONEY", pd.get("refund_card_money")); // 余额
 				pd.put("REMAIN_POINTS", pd.get("refund_card_points"));
+				pd.put("CARD_ID",customstoredpd.get("CARD_ID"));
 				customstoredService.save(pd);
 			}
 			
