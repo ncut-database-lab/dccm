@@ -80,9 +80,10 @@
 									<th class="center">项目名称</th>
 									<th class="center">所属门店</th>
 									<th class="center">生效时间</th>
+									<th class="center">失效时间</th>
+									<th class="center">当前状态</th>
 									<th class="center">价格</th>
 									<th class="center">类型</th>
-									<th class="center">状态</th>
 									<th class="center">操作</th>
 								</tr>
 							</thead>
@@ -104,9 +105,11 @@
 											<td class='center'>${var.PNAME}</td>
 											<td class='center'>${var.STORE_NAME}</td>
 											<td class='center'>${var.EFFECTIVE_DATE}</td>
+											<td class='center'>${var.INEFFECTIVE_DATE}</td>
+											<td class='center'><c:if test="${var.STATUS==1}">有效</c:if><c:if test="${var.STATUS==0}">无效</c:if></td>
 											<td  style="text-align:right;"><fmt:formatNumber type="number" value="${var.PRICE}" pattern="0.00" maxFractionDigits="2"/> </td>
 											<td class='center'><c:if test="${var.ISFIRST==1}">复诊</c:if><c:if test="${var.ISFIRST==0}">初诊</c:if><c:if test="${var.ISFIRST==2}">课程</c:if></td>
-											<td class='center'><c:if test="${var.STATUS==1}">有效</c:if><c:if test="${var.STATUS==0}">无效</c:if></td>
+
 											<td class="center">
 												<c:if test="${QX.edit != 1 && QX.del != 1 }">
 												<span class="label label-large label-grey arrowed-in-right arrowed-in"><i class="ace-icon fa fa-lock" title="无权限"></i></span>

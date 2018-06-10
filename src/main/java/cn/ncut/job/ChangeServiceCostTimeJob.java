@@ -34,7 +34,7 @@ public class ChangeServiceCostTimeJob {
 		
 		for(PageData p : pdlist){
 			//存在到了生效时间的记录，把状态置为1
-			if(df.parse(p.get("EFFECTIVE_DATE").toString()).getTime()<new Date().getTime()){
+			if(df.parse(p.get("EFFECTIVE_DATE").toString()).getTime()<new Date().getTime() && df.parse(p.get("INEFFECTIVE_DATE").toString()).getTime() > new Date().getTime()){
 				p.put("STATUS", "1");
 				
 				

@@ -338,10 +338,10 @@ public class ServiceCostController extends BaseController {
         List<PageData> varList = servicecostService.list(page); // 列出ServiceCost列表
         List<PageData> newlist = new ArrayList<PageData>();
         for (PageData p : varList) {
-            if (df.parse(p.get("EFFECTIVE_DATE").toString()).getTime() > new Date().getTime()) {
+            /*if (df.parse(p.get("EFFECTIVE_DATE").toString()).getTime() > new Date().getTime()) {
                 p.put("STATUS", "0");
             }
-            servicecostService.edit(p);
+            servicecostService.edit(p);*/
             newlist.add(p);
         }
         mv.setViewName("finance/servicecost/servicecost_list");

@@ -83,6 +83,13 @@
                                                    title="生效时间" style="width:98%;"/></td>
                                     </tr>
                                     <tr>
+                                        <td style="width:75px;text-align: right;padding-top: 13px;">失效时间:</td>
+                                        <td><input class="span10 date-picker" name="INEFFECTIVE_DATE" id="INEFFECTIVE_DATE"
+                                                   value="${pd.INEFFECTIVE_DATE}" type="text"
+                                                   data-date-format="yyyy-mm-dd" readonly="readonly" placeholder="失效时间"
+                                                   title="失效时间" style="width:98%;"/></td>
+
+                                    <tr>
                                         <td style="width:75px;text-align: right;padding-top: 13px;">价格:</td>
                                         <td><input type="text" name="PRICE" id="PRICE" value="${pd.PRICE}"
                                                    maxlength="32" placeholder="这里输入价格" title="价格" style="width:98%;"/>
@@ -102,7 +109,7 @@
                                             </select>
                                         </td>
                                     </tr>
-                                    <tr>
+                                    <tr hidden="hidden">
                                         <td style="width:75px;text-align: right;padding-top: 13px;">状态:</td>
                                         <td>
                                             <%-- <input type="number" name="STATUS" id="STATUS" value="${pd.STATUS}" maxlength="32" placeholder="这里输入状态" title="状态" style="width:98%;"/> --%>
@@ -203,6 +210,16 @@
             $("#EFFECTIVE_DATE").focus();
             return false;
         }
+        if ($("#INEFFECTIVE_DATE").val() == "") {
+            $("#INEFFECTIVE_DATE").tips({
+                side: 3,
+                msg: '请选择失效时间',
+                bg: '#AE81FF',
+                time: 2
+            });
+            $("#INEFFECTIVE_DATE").focus();
+            return false;
+        }
         if ($("#PRICE").val() == "") {
             $("#PRICE").tips({
                 side: 3,
@@ -286,6 +303,7 @@
                 alert("加载分类树出错2");
             }
         });
+
     });
 
     function onTreeClick(e, treeId, treeNode) {
