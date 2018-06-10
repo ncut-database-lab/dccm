@@ -107,7 +107,7 @@ public interface CustomStoredManager{
 	 * @param customstoredpd
 	 * @throws Exception
 	 */
-	public void updateUserStoreded(PageData sell_pd, PageData customstoredpd, PageData categorypd) throws Exception;
+	public void updateUserStoreded(PageData sell_pd,  PageData categorypd) throws Exception;
 
 	/**
 	 * 检查用户储值卡密码

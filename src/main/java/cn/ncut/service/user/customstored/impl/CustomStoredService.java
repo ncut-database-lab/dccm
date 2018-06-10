@@ -142,20 +142,15 @@ public class CustomStoredService implements CustomStoredManager{
 	}
 
 	@Override
-	public void updateUserStoreded(PageData sell_pd, PageData customstoredpd, PageData categorypd)
+	public void updateUserStoreded(PageData sell_pd,  PageData categorypd)
 			throws Exception {
 		dao.save("StoredDetailMapper.save", sell_pd);
-		if (customstoredpd != null) {//如果之前有用户
-			sell_pd.put("REMAIN_MONEY", categorypd.get("STORED_MONEY")); // 余额
-			sell_pd.put("REMAIN_POINTS", categorypd.get("RETURN_POINTS"));
-			sell_pd.put("STATUS", "0");
-			dao.save("CustomStoredMapper.save", sell_pd);
-		} else {
+	
 			sell_pd.put("REMAIN_MONEY", categorypd.get("STORED_MONEY")); // 余额
 			sell_pd.put("REMAIN_POINTS", categorypd.get("RETURN_POINTS")); // 剩余点数
 			sell_pd.put("STATUS", "0"); // 状态
 			dao.save("CustomStoredMapper.save", sell_pd);
-		}
+		
 	}
 
 	public void updateMember(PageData pd)throws Exception {
