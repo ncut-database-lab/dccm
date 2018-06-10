@@ -466,7 +466,7 @@ public class OrderController extends BaseController {
 			pddd.put("CREATE_TIME",DateUtil.getTime());
 			pddd.put("MONEY", Double.parseDouble(pd.getString("REMAIN_MONEY")));
 			pddd.put("TYPE", 6);
-			pddd.put("POINTS",pd.get("refund_card_money"));
+			pddd.put("POINTS",pd.get("refund_card_points"));
 			
 			if (Double.parseDouble(pd.getString("REMAIN_MONEY"))!=0&&Double.parseDouble(pd.getString("refund_card_money"))!=0) 
 			customstoredService.saveMx(pddd);
