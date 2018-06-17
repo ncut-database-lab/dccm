@@ -140,7 +140,7 @@ public class WeChatUserStoredCardService implements WeChatUserStoredCardManager 
                     }
                     card.setRemainPoints(card.getRemainPoints().subtract(prePayMoney));
                 }
-                if (card.getRemainPoints().compareTo(zero) == 0) {
+                if (card.getRemainMoney().compareTo(zero) == 0 && card.getRemainPoints().compareTo(zero) == 0) {
                     card.setStatus(1);
                 }
                 break;
@@ -164,6 +164,7 @@ public class WeChatUserStoredCardService implements WeChatUserStoredCardManager 
         for (int i = 0; i < index; i++) {
             dao.update("WeChatUserStoredCardMapper.updateUserCreditCardByCardId", cards.get(i));
         }
+
         return true;
     }
 }

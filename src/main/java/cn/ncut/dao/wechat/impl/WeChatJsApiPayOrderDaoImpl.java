@@ -714,14 +714,17 @@ public class WeChatJsApiPayOrderDaoImpl implements WeChatJsApiPayOrderDao {
 
         // 根据订单金额计算每张储值卡的使用情况
         int index = 0;
+
+        final BigDecimal zero = new BigDecimal("0.00");
+
         for (WeChatUserStoredCard card : cards) {
             BigDecimal assets = card.getRemainMoney().add(card.getRemainPoints());
             index++;
             if (assets.compareTo(prePayMoney) < 0) {
                 // 当前储值卡余额与返点不足以支付订单金额,储值卡状态设置为1
                 card.setStatus(1);
-                card.setRemainMoney(new BigDecimal("0.00"));
-                card.setRemainPoints(new BigDecimal("0.00"));
+                card.setRemainMoney(zero);
+                card.setRemainPoints(zero);
                 prePayMoney = prePayMoney.subtract(assets);
             } else if (assets.compareTo(prePayMoney) >= 0) {
                 // 当前储值卡足够支付订单金额,计算余额与返点需要扣多少
@@ -729,10 +732,10 @@ public class WeChatJsApiPayOrderDaoImpl implements WeChatJsApiPayOrderDao {
                     card.setRemainMoney(card.getRemainMoney().subtract(prePayMoney));
                 } else {
                     prePayMoney = prePayMoney.subtract(card.getRemainMoney());
-                    card.setRemainMoney(new BigDecimal("0.00"));
+                    card.setRemainMoney(zero);
                     card.setRemainPoints(card.getRemainPoints().subtract(prePayMoney));
                 }
-                if (card.getRemainPoints().compareTo(new BigDecimal("0.00")) == 0) {
+                if (card.getRemainMoney().compareTo(zero) == 0 && card.getRemainPoints().compareTo(zero) == 0) {
                     card.setStatus(1);
                 }
                 break;
